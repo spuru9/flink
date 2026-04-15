@@ -1,0 +1,24 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: basic-example
+spec:
+  image: flink:local
+  imagePullPolicy: IfNotPresent
+  flinkVersion: v2_0
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "2"
+    kubernetes.operator.flink.configuration.format: YAML
+  serviceAccount: flink
+  jobManager:
+    resource:
+      memory: "2048m"
+      cpu: 1
+  taskManager:
+    resource:
+      memory: "2048m"
+      cpu: 1
+  job:
+    jarURI: local:///opt/flink/examples/streaming/StateMachineExample.jar
+    parallelism: 2
+    upgradeMode: stateless
