@@ -26,7 +26,7 @@ import {
   HttpResponseBase,
   HttpStatusCode
 } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { ApplicationRef, Injectable } from '@angular/core';
 import { Observable, throwError, timer } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
 
@@ -37,7 +37,8 @@ import { NzNotificationService, NzNotificationDataOptions } from 'ng-zorro-antd/
 export class AppInterceptor implements HttpInterceptor {
   constructor(
     private readonly statusService: StatusService,
-    private readonly notificationService: NzNotificationService
+    private readonly notificationService: NzNotificationService,
+    private readonly appRef: ApplicationRef
   ) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -66,6 +67,7 @@ export class AppInterceptor implements HttpInterceptor {
           if (index !== -1) {
             this.statusService.listOfErrorMessage.splice(index, 1);
             this.notificationService.remove();
+            this.appRef.tick();
           }
         }
       }),
@@ -88,11 +90,13 @@ export class AppInterceptor implements HttpInterceptor {
         ) {
           this.statusService.listOfErrorMessage.push(errorMessage);
           this.notificationService.info('Server Response Message:', errorMessage.replaceAll(' at ', '\n at '), option);
+          this.appRef.tick();
         } else if (res.status === 0 || res.status >= 500) {
           const networkErrorMessage = 'Connection lost or server error. Retrying...';
           if (!this.statusService.listOfErrorMessage.includes(networkErrorMessage)) {
             this.statusService.listOfErrorMessage.push(networkErrorMessage);
             this.notificationService.warning('Network Error:', networkErrorMessage, option);
+            this.appRef.tick();
           }
         }
         return throwError(res);
