@@ -129,8 +129,9 @@
           <nz-badge
             (click)="showMessage()"
             nzShowZero
-            [class.normal]="statusService.listOfErrorMessage.length === 0"
-            [nzCount]="statusService.listOfErrorMessage.length"
+            *ngIf="statusService.listOfErrorMessageChange$ | async as list"
+            [class.normal]="list.length === 0"
+            [nzCount]="list.length"
           ></nz-badge>
         </span>
         <span [hidden]="online$ | async">
@@ -153,7 +154,7 @@
 >
   <ng-container *nzDrawerContent>
     <nz-alert
-      *ngFor="let message of statusService.listOfErrorMessage"
+      *ngFor="let message of statusService.listOfErrorMessageChange$ | async"
       [nzShowIcon]="true"
       [nzType]="'info'"
       [nzMessage]="'Server Response:'"

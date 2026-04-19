@@ -26,7 +26,7 @@ import {
   HttpResponseBase,
   HttpStatusCode
 } from '@angular/common/http';
-import { ApplicationRef, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Observable, throwError, timer } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
 
@@ -37,8 +37,7 @@ import { NzNotificationService, NzNotificationDataOptions } from 'ng-zorro-antd/
 export class AppInterceptor implements HttpInterceptor {
   constructor(
     private readonly statusService: StatusService,
-    private readonly notificationService: NzNotificationService,
-    private readonly appRef: ApplicationRef
+    private readonly notificationService: NzNotificationService
   ) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -65,9 +64,8 @@ export class AppInterceptor implements HttpInterceptor {
           const networkErrorMessage = 'Connection lost or server error. Retrying...';
           const index = this.statusService.listOfErrorMessage.indexOf(networkErrorMessage);
           if (index !== -1) {
-            this.statusService.listOfErrorMessage.splice(index, 1);
+            this.statusService.listOfErrorMessage = this.statusService.listOfErrorMessage.filter((_, i) => i !== index);
             this.notificationService.remove();
-            this.appRef.tick();
           }
         }
       }),
@@ -88,15 +86,13 @@ export class AppInterceptor implements HttpInterceptor {
           ignoreErrorUrlEndsList.every(url => !res.url.endsWith(url)) &&
           ignoreErrorMessage.every(message => errorMessage !== message)
         ) {
-          this.statusService.listOfErrorMessage.push(errorMessage);
+          this.statusService.listOfErrorMessage = [...this.statusService.listOfErrorMessage, errorMessage];
           this.notificationService.info('Server Response Message:', errorMessage.replaceAll(' at ', '\n at '), option);
-          this.appRef.tick();
         } else if (res.status === 0 || res.status >= 500) {
           const networkErrorMessage = 'Connection lost or server error. Retrying...';
           if (!this.statusService.listOfErrorMessage.includes(networkErrorMessage)) {
-            this.statusService.listOfErrorMessage.push(networkErrorMessage);
+            this.statusService.listOfErrorMessage = [...this.statusService.listOfErrorMessage, networkErrorMessage];
             this.notificationService.warning('Network Error:', networkErrorMessage, option);
-            this.appRef.tick();
           }
         }
         return throwError(res);

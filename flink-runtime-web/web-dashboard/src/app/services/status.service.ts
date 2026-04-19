@@ -19,7 +19,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { EMPTY, fromEvent, interval, merge, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, EMPTY, fromEvent, interval, merge, Observable, Subject } from 'rxjs';
 import { debounceTime, filter, map, share, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { Configuration } from '@flink-runtime-web/interfaces';
@@ -35,7 +35,19 @@ export class StatusService {
   private readonly router = inject(Router);
 
   /** Error server response message cache list. */
-  public listOfErrorMessage: string[] = [];
+  private readonly listOfErrorMessage$ = new BehaviorSubject<string[]>([]);
+
+  public get listOfErrorMessage(): string[] {
+    return this.listOfErrorMessage$.value;
+  }
+
+  public set listOfErrorMessage(value: string[]) {
+    this.listOfErrorMessage$.next(value);
+  }
+
+  public get listOfErrorMessageChange$(): Observable<string[]> {
+    return this.listOfErrorMessage$.asObservable();
+  }
 
   /** Flink configuration from backend. */
   public configuration: Configuration;
