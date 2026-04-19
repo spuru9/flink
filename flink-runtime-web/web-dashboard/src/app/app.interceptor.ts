@@ -17,16 +17,18 @@
  */
 
 import {
+  HttpErrorResponse,
   HttpEvent,
   HttpHandler,
   HttpInterceptor,
   HttpRequest,
+  HttpResponse,
   HttpResponseBase,
   HttpStatusCode
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, timer } from 'rxjs';
+import { catchError, retry, tap } from 'rxjs/operators';
 
 import { StatusService } from '@flink-runtime-web/services';
 import { NzNotificationService, NzNotificationDataOptions } from 'ng-zorro-antd/notification';
@@ -48,6 +50,25 @@ export class AppInterceptor implements HttpInterceptor {
     };
 
     return next.handle(req.clone({ withCredentials: true })).pipe(
+      retry({
+        count: 3,
+        delay: (error: HttpErrorResponse, retryCount) => {
+          if (req.method === 'GET' && (error.status === 0 || error.status >= 500)) {
+            return timer(Math.pow(2, retryCount) * 1000);
+          }
+          throw error;
+        }
+      }),
+      tap(event => {
+        if (event instanceof HttpResponse) {
+          const networkErrorMessage = 'Connection lost or server error. Retrying...';
+          const index = this.statusService.listOfErrorMessage.indexOf(networkErrorMessage);
+          if (index !== -1) {
+            this.statusService.listOfErrorMessage.splice(index, 1);
+            this.notificationService.remove();
+          }
+        }
+      }),
       catchError(res => {
         if (
           res instanceof HttpResponseBase &&
@@ -67,6 +88,12 @@ export class AppInterceptor implements HttpInterceptor {
         ) {
           this.statusService.listOfErrorMessage.push(errorMessage);
           this.notificationService.info('Server Response Message:', errorMessage.replaceAll(' at ', '\n at '), option);
+        } else if (res.status === 0 || res.status >= 500) {
+          const networkErrorMessage = 'Connection lost or server error. Retrying...';
+          if (!this.statusService.listOfErrorMessage.includes(networkErrorMessage)) {
+            this.statusService.listOfErrorMessage.push(networkErrorMessage);
+            this.notificationService.warning('Network Error:', networkErrorMessage, option);
+          }
         }
         return throwError(res);
       })
