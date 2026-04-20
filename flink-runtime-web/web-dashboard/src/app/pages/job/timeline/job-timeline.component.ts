@@ -118,6 +118,15 @@ export class JobTimelineComponent implements AfterViewInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private getLabelFill(): string {
+    const fallback = '#ffffff';
+    if (typeof getComputedStyle === 'undefined') {
+      return fallback;
+    }
+    const val = getComputedStyle(document.documentElement).getPropertyValue('--flink-text-color-inverse').trim();
+    return val || fallback;
+  }
+
   public updateSubTaskChart(vertexId: string): void {
     this.listOfSubTaskTimeLine = [];
     this.jobService
@@ -201,7 +210,7 @@ export class JobTimelineComponent implements AfterViewInit, OnDestroy {
         offset: -20,
         position: 'right',
         style: {
-          fill: '#ffffff',
+          fill: this.getLabelFill(),
           textAlign: 'right',
           fontWeight: 'bold'
         },
