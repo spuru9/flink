@@ -29,7 +29,7 @@ import {
   JOB_MANAGER_MODULE_DEFAULT_CONFIG,
   JobManagerModuleConfig
 } from '@flink-runtime-web/pages/job-manager/job-manager.config';
-import { JobManagerService } from '@flink-runtime-web/services';
+import { JobManagerService, ThemeService } from '@flink-runtime-web/services';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzCodeEditorModule, EditorOptions } from 'ng-zorro-antd/code-editor';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -64,11 +64,15 @@ export class JobManagerLogDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly jobManagerService: JobManagerService,
+    themeService: ThemeService,
     private readonly cdr: ChangeDetectorRef,
     private readonly activatedRoute: ActivatedRoute,
     @Inject(JOB_MANAGER_MODULE_CONFIG) readonly moduleConfig: JobManagerModuleConfig
   ) {
-    this.editorOptions = moduleConfig.editorOptions || JOB_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions;
+    this.editorOptions = {
+      ...(moduleConfig.editorOptions || JOB_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions),
+      theme: themeService.getMonacoTheme()
+    };
   }
 
   public ngOnInit(): void {

@@ -29,7 +29,7 @@ import {
   TASK_MANAGER_MODULE_CONFIG,
   TASK_MANAGER_MODULE_DEFAULT_CONFIG
 } from '@flink-runtime-web/pages/task-manager/task-manager.config';
-import { ConfigService, TaskManagerService } from '@flink-runtime-web/services';
+import { ConfigService, TaskManagerService, ThemeService } from '@flink-runtime-web/services';
 import { NzCodeEditorModule, EditorOptions } from 'ng-zorro-antd/code-editor';
 
 @Component({
@@ -52,11 +52,15 @@ export class TaskManagerStdoutComponent implements OnInit, OnDestroy {
   constructor(
     private readonly taskManagerService: TaskManagerService,
     private readonly configService: ConfigService,
+    themeService: ThemeService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
     @Inject(TASK_MANAGER_MODULE_CONFIG) readonly moduleConfig: ModuleConfig
   ) {
-    this.editorOptions = moduleConfig.editorOptions || TASK_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions;
+    this.editorOptions = {
+      ...(moduleConfig.editorOptions || TASK_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions),
+      theme: themeService.getMonacoTheme()
+    };
   }
 
   public ngOnInit(): void {

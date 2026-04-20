@@ -32,7 +32,7 @@ import { distinctUntilChanged, filter, takeUntil } from 'rxjs/operators';
 import * as G2 from '@antv/g2';
 import { Chart } from '@antv/g2';
 import { JobDetailCorrect, VerticesItemRange } from '@flink-runtime-web/interfaces';
-import { JobService, ColorKey, ConfigService } from '@flink-runtime-web/services';
+import { JobService, ColorKey, ConfigService, ThemeService } from '@flink-runtime-web/services';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 
 import { JobLocalService } from '../job-local.service';
@@ -62,12 +62,20 @@ export class JobTimelineComponent implements AfterViewInit, OnDestroy {
     private readonly configService: ConfigService,
     private readonly jobService: JobService,
     private readonly jobLocalService: JobLocalService,
+    private readonly themeService: ThemeService,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
   public ngAfterViewInit(): void {
     this.setUpMainChart();
     this.setUpSubTaskChart();
+    this.themeService.themeChanges$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      const g2Theme = this.themeService.getG2Theme();
+      this.mainChartInstance?.theme(g2Theme);
+      this.mainChartInstance?.render();
+      this.subTaskChartInstance?.theme(g2Theme);
+      this.subTaskChartInstance?.render();
+    });
     this.jobLocalService
       .jobDetailChanges()
       .pipe(
@@ -181,6 +189,7 @@ export class JobTimelineComponent implements AfterViewInit, OnDestroy {
       height: 500,
       padding: [50, 50, 50, 50]
     });
+    this.mainChartInstance.theme(this.themeService.getG2Theme());
     this.mainChartInstance.animate(false);
     this.mainChartInstance.axis('id', false);
     this.mainChartInstance.coordinate('rect').transpose().scale(1, -1);
@@ -228,6 +237,7 @@ export class JobTimelineComponent implements AfterViewInit, OnDestroy {
       height: 10,
       padding: [50, 50, 50, 300]
     });
+    this.subTaskChartInstance.theme(this.themeService.getG2Theme());
     this.subTaskChartInstance.animate(false);
     this.subTaskChartInstance.coordinate('rect').transpose().scale(1, -1);
     this.subTaskChartInstance

@@ -18,7 +18,7 @@
 
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject } from '@angular/core';
 import {catchError, takeUntil} from 'rxjs/operators';
-import { ConfigService, TaskManagerService } from '@flink-runtime-web/services';
+import { ConfigService, TaskManagerService, ThemeService } from '@flink-runtime-web/services';
 import { EditorOptions } from 'ng-zorro-antd/code-editor';
 import {of, Subject} from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -54,11 +54,15 @@ export class TaskManagerLogsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly taskManagerService: TaskManagerService,
     private readonly configService: ConfigService,
+    themeService: ThemeService,
     private activatedRoute: ActivatedRoute,
     private readonly cdr: ChangeDetectorRef,
     @Inject(TASK_MANAGER_MODULE_CONFIG) readonly moduleConfig: ModuleConfig
   ) {
-    this.editorOptions = moduleConfig.editorOptions || TASK_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions;
+    this.editorOptions = {
+      ...(moduleConfig.editorOptions || TASK_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions),
+      theme: themeService.getMonacoTheme()
+    };
   }
 
   public ngOnInit() {

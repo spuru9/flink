@@ -27,7 +27,7 @@ import {
   TASK_MANAGER_MODULE_CONFIG,
   TASK_MANAGER_MODULE_DEFAULT_CONFIG
 } from '@flink-runtime-web/pages/task-manager/task-manager.config';
-import { TaskManagerService } from '@flink-runtime-web/services';
+import { TaskManagerService, ThemeService } from '@flink-runtime-web/services';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NzCodeEditorModule, EditorOptions } from 'ng-zorro-antd/code-editor';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -63,11 +63,15 @@ export class TaskManagerLogDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly taskManagerService: TaskManagerService,
+    themeService: ThemeService,
     private readonly cdr: ChangeDetectorRef,
     private readonly activatedRoute: ActivatedRoute,
     @Inject(TASK_MANAGER_MODULE_CONFIG) readonly moduleConfig: ModuleConfig
   ) {
-    this.editorOptions = moduleConfig.editorOptions || TASK_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions;
+    this.editorOptions = {
+      ...(moduleConfig.editorOptions || TASK_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions),
+      theme: themeService.getMonacoTheme()
+    };
   }
 
   public ngOnInit(): void {

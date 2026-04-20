@@ -25,7 +25,7 @@ import { distinctUntilChanged, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { AutoResizeDirective } from '@flink-runtime-web/components/editor/auto-resize.directive';
 import { flinkEditorOptions } from '@flink-runtime-web/components/editor/editor-config';
 import { ExceptionInfo } from '@flink-runtime-web/interfaces';
-import { ApplicationService } from '@flink-runtime-web/services';
+import { ApplicationService, ThemeService } from '@flink-runtime-web/services';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCodeEditorModule, EditorOptions } from 'ng-zorro-antd/code-editor';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -61,15 +61,18 @@ export class ApplicationExceptionsComponent implements OnInit, OnDestroy {
   public rootException = '';
   public isLoading = false;
   public total = 0;
-  public editorOptions: EditorOptions = flinkEditorOptions;
+  public editorOptions: EditorOptions;
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private readonly applicationService: ApplicationService,
     private readonly applicationLocalService: ApplicationLocalService,
+    themeService: ThemeService,
     private readonly cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    this.editorOptions = { ...flinkEditorOptions, theme: themeService.getMonacoTheme() };
+  }
 
   public ngOnInit(): void {
     this.loadMore();

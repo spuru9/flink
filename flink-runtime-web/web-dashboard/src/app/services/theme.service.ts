@@ -41,6 +41,14 @@ export class ThemeService {
     return this.theme$.value;
   }
 
+  public getMonacoTheme(): 'vs' | 'vs-dark' {
+    return this.theme$.value === 'dark' ? 'vs-dark' : 'vs';
+  }
+
+  public getG2Theme(): 'default' | 'dark' {
+    return this.theme$.value === 'dark' ? 'dark' : 'default';
+  }
+
   public toggle(): void {
     this.setTheme(this.theme$.value === 'dark' ? 'light' : 'dark');
   }
@@ -81,6 +89,13 @@ export class ThemeService {
     } else {
       this.removeDarkStylesheet();
     }
+
+    // Monaco is lazy-loaded; setTheme is a no-op until an editor has rendered.
+    // Editor components re-apply the current theme in their init callback to
+    // cover the "editor created after toggle" case.
+    const monaco = (this.document.defaultView as unknown as { monaco?: { editor?: { setTheme(t: string): void } } })
+      ?.monaco;
+    monaco?.editor?.setTheme(theme === 'dark' ? 'vs-dark' : 'vs');
   }
 
   private ensureDarkStylesheet(): void {

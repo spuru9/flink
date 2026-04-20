@@ -17,7 +17,7 @@
  */
 
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, OnDestroy, Inject } from '@angular/core';
-import { ConfigService, JobManagerService } from '@flink-runtime-web/services';
+import { ConfigService, JobManagerService, ThemeService } from '@flink-runtime-web/services';
 import { EditorOptions } from 'ng-zorro-antd/code-editor';
 import { flinkEditorOptions } from '@flink-runtime-web/components/editor/editor-config';
 import {of, Subject} from 'rxjs';
@@ -53,10 +53,14 @@ export class JobManagerLogsComponent implements OnInit, OnDestroy {
   constructor(
     private readonly jobManagerService: JobManagerService,
     private readonly configService: ConfigService,
+    themeService: ThemeService,
     private readonly cdr: ChangeDetectorRef,
     @Inject(JOB_MANAGER_MODULE_CONFIG) readonly moduleConfig: JobManagerModuleConfig
   ) {
-    this.editorOptions = moduleConfig.editorOptions || JOB_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions;
+    this.editorOptions = {
+      ...(moduleConfig.editorOptions || JOB_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions),
+      theme: themeService.getMonacoTheme()
+    };
     this.downloadUrl = `${this.configService.BASE_URL}/jobmanager/log`;
   }
 

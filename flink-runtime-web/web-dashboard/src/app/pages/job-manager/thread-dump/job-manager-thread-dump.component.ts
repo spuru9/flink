@@ -28,7 +28,7 @@ import {
   JOB_MANAGER_MODULE_DEFAULT_CONFIG,
   JobManagerModuleConfig
 } from '@flink-runtime-web/pages/job-manager/job-manager.config';
-import { ConfigService, JobManagerService } from '@flink-runtime-web/services';
+import { ConfigService, JobManagerService, ThemeService } from '@flink-runtime-web/services';
 import { NzCodeEditorModule, EditorOptions } from 'ng-zorro-antd/code-editor';
 
 @Component({
@@ -50,10 +50,14 @@ export class JobManagerThreadDumpComponent implements OnInit, OnDestroy {
   constructor(
     private readonly jobManagerService: JobManagerService,
     private readonly configService: ConfigService,
+    themeService: ThemeService,
     private readonly cdr: ChangeDetectorRef,
     @Inject(JOB_MANAGER_MODULE_CONFIG) readonly moduleConfig: JobManagerModuleConfig
   ) {
-    this.editorOptions = moduleConfig.editorOptions || JOB_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions;
+    this.editorOptions = {
+      ...(moduleConfig.editorOptions || JOB_MANAGER_MODULE_DEFAULT_CONFIG.editorOptions),
+      theme: themeService.getMonacoTheme()
+    };
     this.downloadUrl = `${this.configService.BASE_URL}/jobmanager/thread-dump`;
   }
 
