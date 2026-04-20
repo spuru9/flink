@@ -20,6 +20,8 @@ import {
   ArrowsAltOutline,
   BarsOutline,
   BuildOutline,
+  BulbFill,
+  BulbOutline,
   CaretDownOutline,
   CaretUpOutline,
   CheckCircleOutline,
@@ -56,6 +58,8 @@ import {
 export const APP_ICONS = [
   BarsOutline,
   BuildOutline,
+  BulbFill,
+  BulbOutline,
   CheckCircleOutline,
   DashboardOutline,
   RightOutline,

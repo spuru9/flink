@@ -23,8 +23,8 @@
   flex-direction: column;
   margin: -24px -24px 0;
   padding: 16px 32px 0;
-  border-bottom: 1px solid @border-color-split;
-  background: @component-background;
+  border-bottom: 1px solid var(--flink-border-color-split);
+  background: var(--flink-component-background);
 
   nz-descriptions {
     margin-bottom: @margin-xs;
@@ -43,13 +43,13 @@
     display: inline-flex;
     align-items: center;
     margin-right: @margin-xs;
-    color: @link-color;
+    color: var(--flink-link-color);
     font-size: @font-size-base;
     text-decoration: none;
     cursor: pointer;
 
     &:hover {
-      color: @link-hover-color;
+      color: var(--flink-link-hover-color);
     }
 
     &::before {

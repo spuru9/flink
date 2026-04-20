@@ -31,7 +31,7 @@
   }
 
   .total {
-    color: @success-color;
+    color: var(--flink-success-color);
     font-size: 36px;
     line-height: 38px;
   }
@@ -39,7 +39,7 @@
   .footer {
     margin-top: @margin-md;
     padding-top: @padding-sm;
-    border-top: @border-width-base @border-style-base @border-color-split;
+    border-top: @border-width-base @border-style-base var(--flink-border-color-split);
 
     .field {
       display: inline-block;
@@ -51,12 +51,12 @@
 
         &:last-child {
           margin-left: @margin-xs;
-          color: @text-color;
+          color: var(--flink-text-color);
           font-weight: 600;
         }
 
         &.warning {
-          color: @warning-color;
+          color: var(--flink-warning-color);
         }
       }
     }

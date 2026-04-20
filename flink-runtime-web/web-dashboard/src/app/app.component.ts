@@ -19,10 +19,10 @@
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { fromEvent, merge } from 'rxjs';
+import { fromEvent, merge, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { StatusService } from '@flink-runtime-web/services';
+import { StatusService, Theme, ThemeService } from '@flink-runtime-web/services';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
@@ -30,6 +30,7 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({
   selector: 'flink-root',
@@ -48,6 +49,7 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
     NzBadgeModule,
     NzDrawerModule,
     NzAlertModule,
+    NzToolTipModule,
     NgIf,
     NgForOf
   ]
@@ -59,6 +61,8 @@ export class AppComponent {
     fromEvent(window, 'offline').pipe(map(() => false)),
     fromEvent(window, 'online').pipe(map(() => true))
   ).pipe(startWith(true));
+
+  theme$: Observable<Theme>;
 
   historyServerEnv = this.statusService.configuration.features['web-history'];
   webSubmitEnabled = this.statusService.configuration.features['web-submit'];
@@ -81,5 +85,12 @@ export class AppComponent {
     this.cdr.markForCheck();
   }
 
-  constructor(public statusService: StatusService, private cdr: ChangeDetectorRef) {}
+  toggleTheme(): void {
+    this.themeService.toggle();
+  }
+
+  constructor(public statusService: StatusService, private themeService: ThemeService, private cdr: ChangeDetectorRef) {
+    this.theme$ = this.themeService.themeChanges$;
+    this.themeService.init();
+  }
 }

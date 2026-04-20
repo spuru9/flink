@@ -23,7 +23,7 @@
   flex: 1;
 
   .text-secondary {
-    color: @text-color-secondary;
+    color: var(--flink-text-color-secondary);
     font-size: @font-size-sm;
   }
 }
@@ -45,12 +45,12 @@
 }
 
 .selected {
-  background: @select-item-selected-bg;
-  color: @text-color;
+  background: var(--flink-select-item-selected-bg);
+  color: var(--flink-text-color);
 
   &:hover {
     td {
-      background: @select-item-selected-bg;
+      background: var(--flink-select-item-selected-bg);
     }
   }
 }

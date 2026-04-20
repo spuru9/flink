@@ -18,3 +18,30 @@
 @import "../../node_modules/ng-zorro-antd/style/themes/default";
 
 @table-border-radius-base: 0;
+
+// Runtime-theme CSS custom properties. Component-scoped stylesheets reference
+// these via var(--flink-*) so dark mode can switch palette without rebuilds.
+// Dark values are declared in theme-dark.less and are applied by loading the
+// dark-theme bundle via ThemeService.
+:root {
+  --flink-text-color: rgba(0, 0, 0, 0.85);
+  --flink-text-color-secondary: rgba(0, 0, 0, 0.45);
+  --flink-text-color-inverse: #fff;
+  --flink-heading-color: rgba(0, 0, 0, 0.85);
+  --flink-component-background: #fff;
+  --flink-layout-header-background: #001529;
+  --flink-background-color-light: #fafafa;
+  --flink-body-background: #fff;
+  --flink-border-color-split: #f0f0f0;
+  --flink-primary-color: #1890ff;
+  --flink-error-color: #ff4d4f;
+  --flink-warning-color: #faad14;
+  --flink-success-color: #52c41a;
+  --flink-link-color: #1890ff;
+  --flink-link-hover-color: #40a9ff;
+  --flink-select-item-selected-bg: #e6f7ff;
+  --flink-layout-body-background: #f0f2f5;
+  --flink-table-row-hover-background: #fafafa;
+  --flink-scrollbar-track: rgba(240, 240, 240, 0.2);
+  --flink-scrollbar-thumb-hover: #a8a8a8;
+}

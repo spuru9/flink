@@ -114,6 +114,18 @@
         (click)="toggleCollapse()"
       ></i>
       <div class="right">
+        <i
+          class="theme-toggle"
+          nz-icon
+          [nzType]="(theme$ | async) === 'dark' ? 'bulb' : 'bulb'"
+          [nzTheme]="(theme$ | async) === 'dark' ? 'fill' : 'outline'"
+          nz-tooltip
+          [nzTooltipTitle]="
+            (theme$ | async) === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+          "
+          (click)="toggleTheme()"
+        ></i>
+        <nz-divider nzType="vertical"></nz-divider>
         <span>
           <strong>Version:</strong>
           {{ statusService.configuration['flink-version'] }}

@@ -52,7 +52,12 @@
               }
             ],
             "styles": [
-              "src/styles/index.less"
+              "src/styles/index.less",
+              {
+                "input": "src/styles/index.dark.less",
+                "bundleName": "dark-theme",
+                "inject": false
+              }
             ],
             "stylePreprocessorOptions": {
               "includePaths": [

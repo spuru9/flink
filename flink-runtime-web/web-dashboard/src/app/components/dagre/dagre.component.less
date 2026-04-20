@@ -40,23 +40,23 @@ nz-slider {
   user-select: none;
 
   .edge-marker {
-    color: @text-color;
-    fill: @text-color;
+    color: var(--flink-text-color);
+    fill: var(--flink-text-color);
   }
 
   .edge-marker-focus {
-    color: @primary-color;
-    fill: @primary-color;
+    color: var(--flink-primary-color);
+    fill: var(--flink-primary-color);
   }
 
   .edge {
     fill: none;
-    stroke: @text-color;
+    stroke: var(--flink-text-color);
     stroke-opacity: 0.6;
     stroke-width: 1px;
 
     &.focused {
-      stroke: @primary-color;
+      stroke: var(--flink-primary-color);
       animation: circle-draw 0.3s linear infinite;
       stroke-dasharray: 10;
       stroke-dashoffset: 0;
@@ -65,7 +65,7 @@ nz-slider {
     }
 
     &.pending {
-      stroke: @text-color;
+      stroke: var(--flink-text-color);
       stroke-dasharray: 10;
       stroke-dashoffset: 0;
       stroke-linecap: round;
@@ -76,7 +76,7 @@ nz-slider {
   .link-group {
     .edge-label {
       font-size: 10px;
-      fill: @text-color;
+      fill: var(--flink-text-color);
       stroke: none;
     }
   }
@@ -89,7 +89,7 @@ nz-slider {
   .nodes-chart-overlay {
     opacity: 0;
     pointer-events: none;
-    fill: @component-background;
+    fill: var(--flink-component-background);
     -webkit-transition: opacity ease-in 0.45s;
 
     &.active {

@@ -24,8 +24,8 @@
   z-index: 2;
   display: block;
   padding: 12px 0;
-  border: 1px solid @border-color-split;
-  background: @background-color-light;
+  border: 1px solid var(--flink-border-color-split);
+  background: var(--flink-background-color-light);
   font-size: 14px;
   transform: translateY(-50%);
 
@@ -40,7 +40,7 @@
   }
 
   &:hover {
-    background: @primary-color;
+    background: var(--flink-primary-color);
     color: #fff;
   }
 }
@@ -53,8 +53,8 @@
   display: block;
   width: 60%;
   height: 100%;
-  border-left: solid 1px @border-color-split;
-  background: @component-background;
+  border-left: solid 1px var(--flink-border-color-split);
+  background: var(--flink-component-background);
 
   &.full-width {
     width: 100%;

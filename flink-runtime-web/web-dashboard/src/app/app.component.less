@@ -26,7 +26,7 @@
 }
 
 .trigger:hover {
-  color: @primary-color;
+  color: var(--flink-primary-color);
 }
 
 .logo {
@@ -34,7 +34,7 @@
   overflow: hidden;
   height: 64px;
   padding-left: 24px;
-  background: @layout-header-background;
+  background: var(--flink-layout-header-background);
   line-height: 64px;
   transition: all 0.3s ease 0s;
 
@@ -65,7 +65,7 @@
 nz-layout {
   overflow: hidden;
   min-height: 100vh;
-  background: darken(@component-background, 5%);
+  background: var(--flink-layout-body-background);
 }
 
 nz-sider {
@@ -80,8 +80,8 @@ nz-header {
   flex: 0 0 auto;
   overflow: hidden;
   padding: 0 12px 0 0;
-  border-bottom: 1px solid @border-color-split;
-  background: @component-background;
+  border-bottom: 1px solid var(--flink-border-color-split);
+  background: var(--flink-component-background);
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
   nz-badge {
@@ -91,7 +91,7 @@ nz-header {
 
     ::ng-deep {
       .ant-badge-count {
-        background: @primary-color;
+        background: var(--flink-primary-color);
       }
     }
 
@@ -100,7 +100,7 @@ nz-header {
 
       ::ng-deep {
         .ant-badge-count {
-          background: @text-color;
+          background: var(--flink-text-color);
         }
       }
     }
@@ -110,18 +110,31 @@ nz-header {
     float: right;
     height: 100%;
 
+    .theme-toggle {
+      padding: 0 12px;
+      color: var(--flink-text-color-secondary);
+      font-size: 18px;
+      line-height: 64px;
+      cursor: pointer;
+      transition: color 0.3s;
+
+      &:hover {
+        color: var(--flink-primary-color);
+      }
+    }
+
     .text {
       display: inline-block;
       height: 100%;
       padding: 0 12px;
-      color: @text-color;
+      color: var(--flink-text-color);
     }
 
     .action {
       transition: all 0.3s;
 
       &:hover {
-        background: @background-color-light;
+        background: var(--flink-background-color-light);
       }
 
       i {
@@ -151,7 +164,7 @@ nz-alert {
 }
 
 .offline {
-  color: @error-color;
+  color: var(--flink-error-color);
   animation: opacity 3s ease-in infinite alternate;
 }
 
