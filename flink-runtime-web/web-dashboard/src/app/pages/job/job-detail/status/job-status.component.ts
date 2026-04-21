@@ -31,6 +31,7 @@ import { JobDetailCorrect } from '@flink-runtime-web/interfaces';
 import { JobLocalService } from '@flink-runtime-web/pages/job/job-local.service';
 import { JOB_MODULE_CONFIG, JOB_MODULE_DEFAULT_CONFIG, JobModuleConfig } from '@flink-runtime-web/pages/job/job.config';
 import { JobManagerService, JobService, StatusService } from '@flink-runtime-web/services';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
@@ -43,6 +44,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgIf,
+    NzButtonModule,
     NzPopconfirmModule,
     NzDescriptionsModule,
     NzDividerModule,
@@ -67,6 +69,7 @@ export class JobStatusComponent implements OnInit, OnDestroy {
 
   webCancelEnabled = this.statusService.configuration.features['web-cancel'];
   isHistoryServer = this.statusService.configuration.features['web-history'];
+  readonly cancelOkButtonProps = { nzType: 'primary' as const, nzDanger: true };
 
   private destroy$ = new Subject<void>();
 
