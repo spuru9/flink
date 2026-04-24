@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 320"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+     role="img" aria-label="Watermark lag timeline">
+  <defs>
+    <linearGradient id="alertBand" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%"  stop-color="#ff4d4f" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#ff4d4f" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- panel bg -->
+  <rect x="0" y="0" width="960" height="320" fill="#fff"/>
+
+  <!-- chart frame: x 70..720, y 30..260 -->
+  <!-- red alert band -->
+  <rect x="70" y="30" width="650" height="46" fill="url(#alertBand)"/>
+  <line x1="70" y1="76" x2="720" y2="76" stroke="#ff4d4f" stroke-dasharray="4 4" stroke-width="1"/>
+  <text x="716" y="72" text-anchor="end" fill="#ff4d4f" font-size="11">alert &gt; 60s</text>
+
+  <!-- y-axis grid + labels -->
+  <g stroke="#eef1f5">
+    <line x1="70" y1="30"  x2="720" y2="30"/>
+    <line x1="70" y1="76"  x2="720" y2="76"/>
+    <line x1="70" y1="122" x2="720" y2="122"/>
+    <line x1="70" y1="168" x2="720" y2="168"/>
+    <line x1="70" y1="214" x2="720" y2="214"/>
+    <line x1="70" y1="260" x2="720" y2="260"/>
+  </g>
+  <g fill="#6b7280" font-size="11" text-anchor="end">
+    <text x="62" y="34">120s</text>
+    <text x="62" y="80">60s</text>
+    <text x="62" y="126">30s</text>
+    <text x="62" y="172">10s</text>
+    <text x="62" y="218">3s</text>
+    <text x="62" y="264">0</text>
+  </g>
+
+  <!-- x-axis labels -->
+  <g fill="#6b7280" font-size="11" text-anchor="middle">
+    <text x="70"  y="278">-30m</text>
+    <text x="200" y="278">-24m</text>
+    <text x="330" y="278">-18m</text>
+    <text x="460" y="278">-12m</text>
+    <text x="590" y="278">-6m</text>
+    <text x="720" y="278">now</text>
+  </g>
+
+  <!-- line: KafkaSource[0] — steady around 3s, healthy -->
+  <polyline fill="none" stroke="#52c41a" stroke-width="2"
+    points="70,232 110,230 150,234 190,231 230,228 270,232 310,230 350,226 390,229 430,232 470,230 510,228 550,231 590,229 630,232 670,230 720,228"/>
+
+  <!-- line: Window[60s] — hovering 15s, spike to 90s mid -->
+  <polyline fill="none" stroke="#1677ff" stroke-width="2"
+    points="70,200 110,196 150,198 190,194 230,190 270,160 310,120 350,56 390,72 430,130 470,170 510,188 550,192 590,196 630,194 670,196 720,200"/>
+
+  <!-- line: JDBCSink — climbing -->
+  <polyline fill="none" stroke="#faad14" stroke-width="2"
+    points="70,210 110,208 150,204 190,198 230,192 270,184 310,174 350,164 390,152 430,140 470,128 510,114 550,104 590,96 630,90 670,86 720,82"/>
+
+  <!-- current-value dots -->
+  <circle cx="720" cy="228" r="3" fill="#52c41a"/>
+  <circle cx="720" cy="200" r="3" fill="#1677ff"/>
+  <circle cx="720" cy="82"  r="3" fill="#faad14"/>
+
+  <!-- right sidebar: operator list with current lag -->
+  <g transform="translate(750,30)">
+    <text x="0" y="0" fill="#6b7280" font-size="11">Operator lag (current)</text>
+
+    <g transform="translate(0,18)">
+      <rect x="0" y="0" width="190" height="44" fill="#fafafa" stroke="#e5e7eb" rx="4"/>
+      <circle cx="12" cy="14" r="4" fill="#52c41a"/>
+      <text x="24" y="18" font-size="12">KafkaSource[0]</text>
+      <text x="24" y="34" font-size="11" fill="#6b7280">3.1s · healthy</text>
+    </g>
+    <g transform="translate(0,68)">
+      <rect x="0" y="0" width="190" height="44" fill="#fafafa" stroke="#e5e7eb" rx="4"/>
+      <circle cx="12" cy="14" r="4" fill="#1677ff"/>
+      <text x="24" y="18" font-size="12">Window[60s]</text>
+      <text x="24" y="34" font-size="11" fill="#6b7280">15s · spike 5m ago</text>
+    </g>
+    <g transform="translate(0,118)">
+      <rect x="0" y="0" width="190" height="44" fill="#fff1f0" stroke="#ffa39e" rx="4"/>
+      <circle cx="12" cy="14" r="4" fill="#faad14"/>
+      <text x="24" y="18" font-size="12">JDBCSink</text>
+      <text x="24" y="34" font-size="11" fill="#d4380d">78s · climbing ↑</text>
+    </g>
+    <g transform="translate(0,170)">
+      <text x="0" y="0" fill="#6b7280" font-size="11">Sorted by lag desc.</text>
+    </g>
+  </g>
+</svg>

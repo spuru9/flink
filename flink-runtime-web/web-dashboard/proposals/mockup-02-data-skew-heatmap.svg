@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 440"
+     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+     role="img" aria-label="Data-skew heatmap on operator list">
+  <rect x="0" y="0" width="1000" height="440" fill="#fff"/>
+
+  <!-- toolbar -->
+  <g>
+    <text x="16" y="28" font-size="14" font-weight="600">Operators (job: click-stream-enrich)</text>
+
+    <!-- metric picker -->
+    <g transform="translate(636,12)">
+      <text x="0" y="16" font-size="11" fill="#6b7280">metric</text>
+      <rect x="38" y="0" width="200" height="24" fill="#fafafa" stroke="#e5e7eb" rx="4"/>
+      <text x="48" y="16" font-size="12">busyTimeMsPerSecond</text>
+      <polygon points="222,10 230,10 226,16" fill="#6b7280"/>
+    </g>
+    <!-- normalization toggle -->
+    <g transform="translate(852,12)">
+      <rect x="0"  y="0" width="66" height="24" fill="#e6f4ff" stroke="#91caff" rx="4"/>
+      <text x="10" y="16" font-size="11" fill="#0958d9">per-op ·</text>
+      <rect x="66" y="0" width="66" height="24" fill="#fff" stroke="#e5e7eb" rx="4"/>
+      <text x="76" y="16" font-size="11" fill="#6b7280">per-job</text>
+    </g>
+  </g>
+
+  <!-- column headers -->
+  <g transform="translate(16,58)" font-size="11" fill="#6b7280">
+    <text x="0"   y="0">Operator</text>
+    <text x="300" y="0">Distribution across subtasks</text>
+    <text x="740" y="0">Skew</text>
+    <text x="830" y="0">Throughput</text>
+  </g>
+
+  <!-- =================== ROW 1: Source — healthy ================= -->
+  <g transform="translate(16,80)">
+    <rect x="0" y="0" width="968" height="48" fill="#fafafa" stroke="#e5e7eb" rx="4"/>
+    <text x="14" y="20" font-size="13" font-weight="600">KafkaSource</text>
+    <text x="14" y="36" font-size="11" fill="#6b7280">parallelism 16 · source</text>
+
+    <g transform="translate(284,14)">
+      <rect x="0"   y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="27"  y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="54"  y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="81"  y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="108" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="135" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="162" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="189" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="216" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="243" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="270" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="297" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="324" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="351" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="378" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="405" y="0" width="26" height="20" fill="#91caff"/>
+    </g>
+
+    <text x="720" y="30" font-size="12" fill="#6b7280">1.1×</text>
+    <text x="814" y="26" font-size="12">48,200 rec/s</text>
+    <text x="814" y="42" font-size="11" fill="#6b7280">busy ~120 ms/s</text>
+  </g>
+
+  <!-- =================== ROW 2: Map — healthy ================= -->
+  <g transform="translate(16,140)">
+    <rect x="0" y="0" width="968" height="48" fill="#fafafa" stroke="#e5e7eb" rx="4"/>
+    <text x="14" y="20" font-size="13" font-weight="600">Parse (flatMap)</text>
+    <text x="14" y="36" font-size="11" fill="#6b7280">parallelism 16 · stateless</text>
+
+    <g transform="translate(284,14)">
+      <rect x="0"   y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="27"  y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="54"  y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="81"  y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="108" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="135" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="162" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="189" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="216" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="243" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="270" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="297" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="324" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="351" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="378" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="405" y="0" width="26" height="20" fill="#91caff"/>
+    </g>
+
+    <text x="720" y="30" font-size="12" fill="#6b7280">1.2×</text>
+    <text x="814" y="26" font-size="12">47,900 rec/s</text>
+    <text x="814" y="42" font-size="11" fill="#6b7280">busy ~210 ms/s</text>
+  </g>
+
+  <!-- =================== ROW 3: KeyedAgg — SEVERE SKEW ================= -->
+  <g transform="translate(16,200)">
+    <rect x="0" y="0" width="968" height="48" fill="#fff1f0" stroke="#ffa39e" rx="4"/>
+    <text x="14" y="20" font-size="13" font-weight="600" fill="#cf1322">KeyedAgg (keyBy userId)</text>
+    <text x="14" y="36" font-size="11" fill="#6b7280">parallelism 16 · stateful (RocksDB)</text>
+
+    <g transform="translate(284,14)">
+      <rect x="0"   y="0" width="26" height="20" fill="#e6f4ff"/>
+      <rect x="27"  y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="54"  y="0" width="26" height="20" fill="#e6f4ff"/>
+      <rect x="81"  y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="108" y="0" width="26" height="20" fill="#e6f4ff"/>
+      <rect x="135" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="162" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="189" y="0" width="26" height="20" fill="#003a8c"/>
+      <rect x="216" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="243" y="0" width="26" height="20" fill="#e6f4ff"/>
+      <rect x="270" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="297" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="324" y="0" width="26" height="20" fill="#e6f4ff"/>
+      <rect x="351" y="0" width="26" height="20" fill="#bae0ff"/>
+      <rect x="378" y="0" width="26" height="20" fill="#e6f4ff"/>
+      <rect x="405" y="0" width="26" height="20" fill="#91caff"/>
+      <g transform="translate(178,-14)">
+        <rect x="0"  y="0" width="66" height="12" fill="#001d66" rx="2"/>
+        <text x="5"  y="9" font-size="9" fill="#fff">subtask 7: hot</text>
+      </g>
+    </g>
+
+    <g transform="translate(706,14)">
+      <rect x="0"  y="0" width="56" height="20" fill="#ff4d4f" rx="10"/>
+      <text x="10" y="14" font-size="11" fill="#fff" font-weight="600">skew 12×</text>
+    </g>
+
+    <text x="814" y="26" font-size="12" fill="#cf1322">ST7: 41k rec/s · others ~3k</text>
+    <text x="814" y="42" font-size="11" fill="#6b7280">busy ST7 ≈ 950 ms/s</text>
+  </g>
+
+  <!-- =================== ROW 4: Window — MILD SKEW ================= -->
+  <g transform="translate(16,260)">
+    <rect x="0" y="0" width="968" height="48" fill="#fffbe6" stroke="#ffe58f" rx="4"/>
+    <text x="14" y="20" font-size="13" font-weight="600" fill="#d46b08">Window[60s tumbling]</text>
+    <text x="14" y="36" font-size="11" fill="#6b7280">parallelism 16 · stateful</text>
+
+    <g transform="translate(284,14)">
+      <rect x="0"   y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="27"  y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="54"  y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="81"  y="0" width="26" height="20" fill="#4096ff"/>
+      <rect x="108" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="135" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="162" y="0" width="26" height="20" fill="#4096ff"/>
+      <rect x="189" y="0" width="26" height="20" fill="#1677ff"/>
+      <rect x="216" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="243" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="270" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="297" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="324" y="0" width="26" height="20" fill="#4096ff"/>
+      <rect x="351" y="0" width="26" height="20" fill="#69b1ff"/>
+      <rect x="378" y="0" width="26" height="20" fill="#91caff"/>
+      <rect x="405" y="0" width="26" height="20" fill="#4096ff"/>
+    </g>
+
+    <g transform="translate(706,14)">
+      <rect x="0"  y="0" width="56" height="20" fill="#faad14" rx="10"/>
+      <text x="10" y="14" font-size="11" fill="#fff" font-weight="600">skew 2.3×</text>
+    </g>
+
+    <text x="814" y="26" font-size="12">26,400 rec/s</text>
+    <text x="814" y="42" font-size="11" fill="#6b7280">busy ~620 ms/s</text>
+  </g>
+
+  <!-- =================== ROW 5: Sink — healthy ================= -->
+  <g transform="translate(16,320)">
+    <rect x="0" y="0" width="968" height="48" fill="#fafafa" stroke="#e5e7eb" rx="4"/>
+    <text x="14" y="20" font-size="13" font-weight="600">JDBCSink</text>
+    <text x="14" y="36" font-size="11" fill="#6b7280">parallelism 8 · sink</text>
+
+    <g transform="translate(284,14)">
+      <rect x="0"   y="0" width="53" height="20" fill="#91caff"/>
+      <rect x="54"  y="0" width="53" height="20" fill="#69b1ff"/>
+      <rect x="108" y="0" width="53" height="20" fill="#91caff"/>
+      <rect x="162" y="0" width="53" height="20" fill="#69b1ff"/>
+      <rect x="216" y="0" width="53" height="20" fill="#91caff"/>
+      <rect x="270" y="0" width="53" height="20" fill="#69b1ff"/>
+      <rect x="324" y="0" width="53" height="20" fill="#91caff"/>
+      <rect x="378" y="0" width="53" height="20" fill="#69b1ff"/>
+    </g>
+
+    <text x="720" y="30" font-size="12" fill="#6b7280">1.3×</text>
+    <text x="814" y="26" font-size="12">26,400 rec/s</text>
+    <text x="814" y="42" font-size="11" fill="#6b7280">busy ~480 ms/s</text>
+  </g>
+
+  <!-- footnote -->
+  <g transform="translate(16,388)">
+    <text x="0" y="0"  font-size="11" fill="#6b7280">Legend: cell intensity = busy time, normalized per operator. Hover a cell for subtask index + exact value. Click → jump to subtask drawer.</text>
+    <text x="0" y="18" font-size="11" fill="#6b7280">Skew chip: <tspan fill="#cf1322">red &gt; 3×</tspan>, <tspan fill="#d46b08">amber &gt; 1.5×</tspan>, hidden below 1.5×.</text>
+  </g>
+</svg>
