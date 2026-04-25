@@ -18,6 +18,7 @@
 
 package org.apache.flink.table.planner.plan.nodes.exec.stream;
 
+import org.apache.flink.table.api.TableRuntimeException;
 import org.apache.flink.table.connector.ChangelogMode;
 import org.apache.flink.table.test.program.SinkTestStep;
 import org.apache.flink.table.test.program.SourceTestStep;
@@ -93,10 +94,10 @@ public class FromChangelogTestPrograms {
                                     + "op_mapping => MAP['c, r', 'INSERT', 'ub', 'UPDATE_BEFORE', 'ua', 'UPDATE_AFTER', 'd', 'DELETE'])")
                     .build();
 
-    public static final TableTestProgram UNMAPPED_CODES_DROPPED =
+    public static final TableTestProgram SKIP_INVALID_OP_HANDLING =
             TableTestProgram.of(
                             "from-changelog-unmapped-codes-dropped",
-                            "unmapped op codes are silently dropped")
+                            "unmapped op codes are silently dropped when configured")
                     .setupTableSource(
                             SourceTestStep.newBuilder("cdc_stream")
                                     .addSchema(SIMPLE_CDC_SCHEMA)
@@ -116,7 +117,33 @@ public class FromChangelogTestPrograms {
                                     .build())
                     .runSql(
                             "INSERT INTO sink SELECT * FROM FROM_CHANGELOG("
-                                    + "input => TABLE cdc_stream)")
+                                    + "input => TABLE cdc_stream,"
+                                    + "error_handling => 'SKIP')")
+                    .build();
+
+    public static final TableTestProgram SKIP_NULL_OP_CODE =
+            TableTestProgram.of(
+                            "from-changelog-null-op-code-dropped",
+                            "NULL op codes are silently dropped when configured")
+                    .setupTableSource(
+                            SourceTestStep.newBuilder("cdc_stream")
+                                    .addSchema(SIMPLE_CDC_SCHEMA)
+                                    .producedValues(
+                                            Row.of(1, "INSERT", "Alice"),
+                                            Row.of(2, null, "Bob"),
+                                            Row.of(3, "INSERT", "Carol"))
+                                    .build())
+                    .setupTableSink(
+                            SinkTestStep.newBuilder("sink")
+                                    .addSchema("id INT", "name STRING")
+                                    .consumedValues(
+                                            Row.ofKind(RowKind.INSERT, 1, "Alice"),
+                                            Row.ofKind(RowKind.INSERT, 3, "Carol"))
+                                    .build())
+                    .runSql(
+                            "INSERT INTO sink SELECT * FROM FROM_CHANGELOG("
+                                    + "input => TABLE cdc_stream,"
+                                    + "error_handling => 'SKIP')")
                     .build();
 
     /** Custom op column name via DESCRIPTOR. */
@@ -206,5 +233,91 @@ public class FromChangelogTestPrograms {
                     .runSql(
                             "INSERT INTO sink SELECT * FROM FROM_CHANGELOG("
                                     + "input => TABLE changelog_view)")
+                    .build();
+
+    // --------------------------------------------------------------------------------------------
+    // Restore tests
+    // --------------------------------------------------------------------------------------------
+
+    /**
+     * Append source with retract op codes through FROM_CHANGELOG, split across a compiled-plan +
+     * savepoint restore.
+     */
+    public static final TableTestProgram RETRACT_RESTORE =
+            TableTestProgram.of(
+                            "from-changelog-retract-restore",
+                            "FROM_CHANGELOG over an append CDC source restores via compiled plan "
+                                    + "+ savepoint")
+                    .setupTableSource(
+                            SourceTestStep.newBuilder("cdc_stream")
+                                    .addSchema(SIMPLE_CDC_SCHEMA)
+                                    .producedBeforeRestore(
+                                            Row.of(1, "INSERT", "Alice"),
+                                            Row.of(2, "INSERT", "Bob"))
+                                    .producedAfterRestore(
+                                            Row.of(1, "UPDATE_BEFORE", "Alice"),
+                                            Row.of(1, "UPDATE_AFTER", "Alice2"),
+                                            Row.of(2, "DELETE", "Bob"))
+                                    .build())
+                    .setupTableSink(
+                            SinkTestStep.newBuilder("sink")
+                                    .addSchema("id INT", "name STRING")
+                                    .consumedBeforeRestore(
+                                            Row.ofKind(RowKind.INSERT, 1, "Alice"),
+                                            Row.ofKind(RowKind.INSERT, 2, "Bob"))
+                                    .consumedAfterRestore(
+                                            Row.ofKind(RowKind.UPDATE_BEFORE, 1, "Alice"),
+                                            Row.ofKind(RowKind.UPDATE_AFTER, 1, "Alice2"),
+                                            Row.ofKind(RowKind.DELETE, 2, "Bob"))
+                                    .build())
+                    .runSql(
+                            "INSERT INTO sink SELECT * FROM FROM_CHANGELOG("
+                                    + "input => TABLE cdc_stream)")
+                    .build();
+
+    // --------------------------------------------------------------------------------------------
+    // Error validation tests
+    // --------------------------------------------------------------------------------------------
+
+    public static final TableTestProgram INVALID_OP_CODE =
+            TableTestProgram.of(
+                            "from-changelog-invalid-op-code",
+                            "fails when input contains an op code not in the mapping")
+                    .setupTableSource(
+                            SourceTestStep.newBuilder("cdc_stream")
+                                    .addSchema(SIMPLE_CDC_SCHEMA)
+                                    .producedValues(Row.of(1, "UNKNOWN", "Alice"))
+                                    .build())
+                    .setupTableSink(
+                            SinkTestStep.newBuilder("sink")
+                                    .addSchema("id INT", "name STRING")
+                                    .consumedValues(new Row[0])
+                                    .build())
+                    .runFailingSql(
+                            "INSERT INTO sink SELECT * FROM FROM_CHANGELOG("
+                                    + "input => TABLE cdc_stream)",
+                            TableRuntimeException.class,
+                            "Received invalid op code 'UNKNOWN'")
+                    .build();
+
+    public static final TableTestProgram NULL_OP_CODE =
+            TableTestProgram.of(
+                            "from-changelog-null-op-code",
+                            "fails when input contains a NULL op code")
+                    .setupTableSource(
+                            SourceTestStep.newBuilder("cdc_stream")
+                                    .addSchema(SIMPLE_CDC_SCHEMA)
+                                    .producedValues(Row.of(1, null, "Alice"))
+                                    .build())
+                    .setupTableSink(
+                            SinkTestStep.newBuilder("sink")
+                                    .addSchema("id INT", "name STRING")
+                                    .consumedValues(new Row[0])
+                                    .build())
+                    .runFailingSql(
+                            "INSERT INTO sink SELECT * FROM FROM_CHANGELOG("
+                                    + "input => TABLE cdc_stream)",
+                            TableRuntimeException.class,
+                            "Received NULL op code")
                     .build();
 }
