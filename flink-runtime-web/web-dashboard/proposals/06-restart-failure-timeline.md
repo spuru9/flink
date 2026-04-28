@@ -2,7 +2,7 @@
 
 **Area:** `flink-runtime-web` — Web Dashboard
 **Status:** Proposal
-**Mockup:** `mockup-07-restart-failure-timeline.svg`
+**Mockup:** `mockup-06-restart-failure-timeline.svg`
 
 ## Pitch
 

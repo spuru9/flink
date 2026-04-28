@@ -2,7 +2,7 @@
 
 **Area:** `flink-runtime-web` — Web Dashboard
 **Status:** Proposal
-**Mockup:** `mockup-06-watermark-lag-timeline.svg`
+**Mockup:** `mockup-05-watermark-lag-timeline.svg`
 
 ## Pitch
 

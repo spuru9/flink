@@ -1,6 +1,6 @@
 # Background & Concepts: Everything You Need to Understand the Watermark Lag Timeline Proposal
 
-A self-contained primer for anyone picking up proposal `06-watermark-lag-timeline.md` without deep Flink or Angular-dashboard background. By the end you should understand:
+A self-contained primer for anyone picking up proposal `05-watermark-lag-timeline.md` without deep Flink or Angular-dashboard background. By the end you should understand:
 
 - The difference between event time and processing time.
 - What a watermark *is*, what it promises, and what it doesn't.
@@ -370,8 +370,8 @@ If any of these are still fuzzy, re-read the referenced section:
 
 1. **Timely Stream Processing** concept page — internalizes event time vs processing time + watermarks. (15 min)
 2. **Generating Watermarks** docs — covers bounded-out-of-orderness and idleness. (10 min)
-3. The proposal itself: `06-watermark-lag-timeline.md`. (5 min)
-4. The mockup: `mockup-06-watermark-lag-timeline.svg`. (2 min)
+3. The proposal itself: `05-watermark-lag-timeline.md`. (5 min)
+4. The mockup: `mockup-05-watermark-lag-timeline.svg`. (2 min)
 5. Re-read Part 7 of this doc ("What watermark lag is"). The diagnostic-table is the single most important takeaway. (5 min)
 6. Skim the Akidau Dataflow paper abstract + section on watermarks, or read Streaming 101 for a gentler intro. (10 min)
 

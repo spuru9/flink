@@ -1,6 +1,6 @@
 # Background & Concepts: Everything You Need to Understand the Restart & Failure Timeline Proposal
 
-A self-contained primer for anyone picking up proposal `07-restart-failure-timeline.md` without deep Flink or Angular-dashboard background. By the end you should understand:
+A self-contained primer for anyone picking up proposal `06-restart-failure-timeline.md` without deep Flink or Angular-dashboard background. By the end you should understand:
 
 - What the lifecycle of a Flink job actually is (attempts, restarts, recovery).
 - Why failures propagate the way they do — the "pipelined region" concept.
@@ -369,8 +369,8 @@ If any of these are still fuzzy, re-read the referenced section:
 
 1. **Task Failure Recovery** docs — internalizes restart strategies + failover regions. (10 min)
 2. **Job lifecycle / scheduling** internals — how attempts work. (5 min)
-3. The proposal itself: `07-restart-failure-timeline.md`. (5 min)
-4. The mockup: `mockup-07-restart-failure-timeline.svg`. (2 min)
+3. The proposal itself: `06-restart-failure-timeline.md`. (5 min)
+4. The mockup: `mockup-06-restart-failure-timeline.svg`. (2 min)
 5. Re-read Part 3 of this doc ("Task-level failure" + "Failover regions") and Part 7 ("Inferring attempt boundaries"). The v1 inference strategy is the single most important pragmatic detail. (5 min)
 6. Open an Airflow or GitHub Actions timeline view to see the industry-standard visual in production, for grounding. (5 min)
 

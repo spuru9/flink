@@ -187,8 +187,9 @@ The gaps above (#1–#12) are incremental UX improvements — the dashboard *has
 | 02 Skew Heatmap | #4, partial #3 | Incremental |
 | 03 Dark Mode | #10 | Incremental |
 | 04 Backpressure Overlay | #5 | Incremental |
-| 06 Watermark Lag Timeline | #1 | Incremental (highest-impact) |
-| 07 Restart & Failure Timeline | partial #9 (post-incident forensics) | Incremental |
+| 05 Watermark Lag Timeline | #1 | Incremental (highest-impact) |
+| 06 Restart & Failure Timeline | partial #9 (post-incident forensics) | Incremental |
+| 07 Kafka Source Lag | partial #4 (source-side skew); source-observability sibling of #1 | Incremental |
 
 ### Incremental gaps NOT yet proposed
 
@@ -209,13 +210,14 @@ Gaps #13–#26 are a different kind of bet. They *change what a Flink dashboard 
 
 ### Honest impact ranking (incremental tier, per unit of effort)
 
-1. Watermark-lag timeline — proposal 06
+1. Watermark-lag timeline — proposal 05
 2. Checkpoint Gantt — proposal 01
 3. Backpressure overlay — proposal 04
 4. Skew heatmap — proposal 02
-5. Restart & failure timeline — proposal 07
-6. Accessibility pass on core pages (gap #11) — *not yet proposed*
-7. Dark mode — proposal 03
+5. Kafka source lag — proposal 07
+6. Restart & failure timeline — proposal 06
+7. Accessibility pass on core pages (gap #11) — *not yet proposed*
+8. Dark mode — proposal 03
 
 ---
 
@@ -223,7 +225,7 @@ Gaps #13–#26 are a different kind of bet. They *change what a Flink dashboard 
 
 - `01-checkpoint-gantt.md` — the proposal with the most-complete mockup.
 - `01-checkpoint-gantt-background.md` — context for anyone new to Flink internals.
-- `06-watermark-lag-timeline.md` + its background — highest-impact incremental bet.
+- `05-watermark-lag-timeline.md` + its background — highest-impact incremental bet.
 - Dataflow's public docs for comparative UX reference (search "Dataflow monitoring interface" in Google Cloud docs).
 - Spark UI's Structured Streaming tab screenshots (https://spark.apache.org/docs/latest/web-ui.html).
 - Grafana dashboard-JSON schema (for Gap 24 prior art).
