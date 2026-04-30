@@ -1,10 +1,10 @@
-# Proposals: Six Small Wins
+# Proposals: Five Small Wins
 
 **Area:** `flink-runtime-web` — Web Dashboard
 **Status:** Proposal
 **Companion:** `08-small-wins-background.md`
 
-A bundle of six small, single-PR proposals. Each one is days-of-work scope and lands on a page every operator opens. They close incremental gaps from `00-peer-comparison-and-gaps.md` (#11, #12, #21, #26) plus three not-yet-numbered surface gaps (refresh control, subtask-table power tools, deep-links).
+A bundle of five small, single-PR proposals. Each one is days-of-work scope and lands on a page every operator opens. They close incremental gaps from `00-peer-comparison-and-gaps.md` (#11, #12, #21) plus three not-yet-numbered surface gaps (refresh control, subtask-table power tools, deep-links).
 
 The proposals share no dependencies on each other and can ship in any order or in parallel.
 
@@ -14,10 +14,9 @@ The proposals share no dependencies on each other and can ship in any order or i
 | B | Subtask-table power tools | partial #3, #12 | ~300 | per-job |
 | C | Metric deep-links | (new — bridges #16) | ~200 | metric-bearing pages |
 | D | Job list search & tags | partial #21 | ~250 | cluster home |
-| E | DAG minimap & pan-to-vertex | partial #26 | ~200 | per-job |
 | F | Keyboard shortcuts | (new) | ~250 | every page |
 
-Order recommended for impact-per-day-of-work: **C → B → A → D → E → F**.
+Order recommended for impact-per-day-of-work: **C → B → A → D → F**.
 
 ---
 
@@ -302,79 +301,6 @@ If the dashboard knows the current user (via `web.access-control-allow-origin` r
 
 ---
 
-## E. DAG minimap & pan-to-vertex search
-
-### Pitch
-
-Gap #26 in `00-peer-comparison-and-gaps.md` flags `dagre@0.8.5` as a 5-yr-stale meta-blocker. The full engine swap is multi-month. **Minimap + pan-to-vertex search** are a small wrapper *on top of* the existing dagre engine — visible on every job page, days of work, no engine swap. They de-risk the eventual swap by establishing the UX targets ahead of time.
-
-### What already exists
-
-The dashboard's dagre layer already has decent zoom plumbing — important context to avoid duplicating it:
-
-- **Zoom slider** — `dagre.component.html:103-111` renders an `nz-slider` (vertical, range `[0.1, 5]`) bound to `dagre.component.ts:zoomToLevel()`.
-- **Pan via drag** — `svg-container.component.ts` wires `d3-zoom` (lines 77–90); the user can drag the canvas around.
-- **Zoom-to-focus** — `graph.ts:zoomFocusLayout()` (line 219) computes a transform that focuses on a chosen vertex; called from `dagre.component.ts:290`. This is effectively "zoom-to-fit" for a single node and is already wired to node-click.
-
-So this proposal is **not** about adding zoom controls. They're done. What's missing is *navigational orientation* on a large DAG: a minimap and a way to pan-to-a-named vertex.
-
-### Problem
-
-What the existing affordances don't give you on a 100-vertex DAG:
-
-- No minimap. The slider sets the zoom level but you still don't know *where in the graph* you are. Past ~30 vertices, the user scrolls a viewport with no overview.
-- No "highlight + pan to" for a search hit. You can scroll, you can zoom — you can't say "show me the operator named `KeyedAgg`."
-
-Every other gap that touches the DAG (proposal 04 backpressure overlay, gap #21 fleet view, gap #22 job-to-job diff) inherits this surface limitation.
-
-### Proposal
-
-#### 1. Minimap
-
-A 200×120 px box pinned to the bottom-right of the DAG canvas:
-
-- A miniature SVG of the same graph, ~10% scale, no labels.
-- A draggable viewport rectangle showing the user's current pan/zoom window — derived from the existing `transformEvent` (`dagre.component.html:27`) the host already emits.
-- Click anywhere on the minimap → pans the main view to that location (calls into the existing `svgContainer.zoomController.transform`).
-
-#### 2. Pan-to-vertex search
-
-A search input above the DAG. Type → matches against vertex names → first match highlights with a halo and pans into view by reusing `zoomFocusLayout()` — which already does the focus-and-transform math.
-
-#### 3. Persistence (optional)
-
-Last-pan position persists per-job in `localStorage`. Coming back to a 200-vertex job restores your last viewing context. Skip if it's not free; the minimap mostly removes the need for this.
-
-### Implementation sketch
-
-- New component: `src/app/components/dagre/components/minimap/minimap.component.ts`. Renders a re-scaled clone of the same `<svg>` content from `dagre.component.ts` graph state.
-- Subscribes to the existing `transformEvent` from `flink-svg-container` to keep the viewport rectangle in sync.
-- Click handler on the minimap → computes target transform → calls `svgContainer.zoomController.transform`.
-- Search input lives in `dagre.component.html` next to the existing checkbox; `(submit)` calls a thin wrapper around `graph.zoomFocusLayout()`.
-
-### Scope
-
-~200 LOC (minimap component, pan-to-vertex search, optional persistence). Smaller than initially scoped because zoom controls and focus-zoom math already exist.
-
-### Impact
-
-- Visible on every job page.
-- Unlocks downstream proposals that need the DAG (04 backpressure overlay is tractable on a 200-vertex job once you can navigate it).
-- Establishes UX targets for the eventual `dagre` replacement.
-
-### Risks
-
-- Performance on very large DAGs (1000+ vertices) — minimap re-renders on every pan. Mitigation: render minimap once, only the viewport rectangle moves.
-- Minimap and `d3-tip` tooltips can fight if the minimap overlays a node region. Z-index and pointer-events need a quick check.
-
-### Open questions
-
-- Should the minimap be always-visible or expand-on-hover? Defaults: hidden on graphs ≤ 20 vertices, shown above that.
-- Pan-to-vertex search overlaps with existing UI (the operator drawer's vertex list); decide whether to fold that in or keep separate.
-- Is this where we should also tackle the dagre version bump? Leaning **no** — keep this proposal scoped to "no engine change," do the bump in a separate PR with its own release notes.
-
----
-
 ## F. Keyboard shortcuts & shortcut help (`?`)
 
 ### Pitch
@@ -443,12 +369,12 @@ Bottom-of-page "?" hint chip, dismissible, persists dismissal in `localStorage`.
 ## Cross-cutting notes
 
 - Each proposal is a separate Jira ticket / separate PR. Bundling them into one PR is tempting (they all touch shared headers) but multiplies review surface.
-- Five of the six (A, B, D, E, F) are pure-frontend. Only C touches backend (two new config keys in `WebOptions`).
+- Four of the five (A, B, D, F) are pure-frontend. Only C touches backend (two new config keys in `WebOptions`).
 - None require a FLIP. C *might* benefit from a short dev@ note ("planning to add `web.metrics.prometheus-url` config keys") to surface conflicts.
 - All compose cleanly with the existing 7 proposals — see the `Composes with` notes on each.
 
 ## Suggested reading order
 
 1. This file end-to-end (~10 min).
-2. `08-small-wins-background.md` — covers shared concepts (refresh stream, dagre, REST shape, ng-zorro tables) once instead of six times.
+2. `08-small-wins-background.md` — covers shared concepts (refresh stream, REST shape, ng-zorro tables) once instead of five times.
 3. `00-peer-comparison-and-gaps.md` — to see how these slot into the wider landscape.

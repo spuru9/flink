@@ -1,13 +1,12 @@
-# Background & Concepts: Six Small Wins
+# Background & Concepts: Five Small Wins
 
 A self-contained primer for anyone picking up `08-small-wins.md` without deep Flink-dashboard context. By the end you should understand:
 
-- The shared frontend stack the six proposals all sit on.
+- The shared frontend stack the five proposals all sit on.
 - The single polling primitive (`StatusService.refresh$`) that drives every live page.
 - The REST shape behind the job list and subtask tables.
-- How the DAG is rendered today and what the dagre dependency actually does.
 - The metrics pipeline (`MetricsService`) that proposal C bridges into the time-series world.
-- Why each of the six proposals is tractable as a single small PR.
+- Why each of the five proposals is tractable as a single small PR.
 
 Read top-to-bottom once. Per-proposal detail lives in the proposal file; this doc covers what's *shared* across them.
 
@@ -21,7 +20,7 @@ If you've worked on Spark UI or any internal admin dashboard from the last decad
 
 ---
 
-## Part 2 — The frontend stack (shared by all six proposals)
+## Part 2 — The frontend stack (shared by all five proposals)
 
 ### Angular 20 (TypeScript)
 
@@ -41,13 +40,12 @@ If you've worked on Spark UI or any internal admin dashboard from the last decad
 
 - The UI component library. Tables, tabs, drawers, buttons, modals, tags, dropdowns.
 - Theming via LESS variables (which is exactly why proposal 03 dark-mode is so much work — see that proposal).
-- For these six proposals, the relevant ng-zorro components are: `nz-table` (B, D), `nz-input` (B, D, F), `nz-tag` (D), `nz-modal` (F), `nz-tooltip` (C), `nz-dropdown` (A).
+- For these five proposals, the relevant ng-zorro components are: `nz-table` (B, D), `nz-input` (B, D, F), `nz-tag` (D), `nz-modal` (F), `nz-tooltip` (C), `nz-dropdown` (A).
 
 ### @antv/g2 and d3
 
 - `@antv/g2` is the chart library. Used for the per-vertex metric chart in `pages/job/overview/chart/job-overview-drawer-chart.component.ts` and similar.
-- `d3` is used for the DAG (`components/dagre/`) and the flame graph (`pages/job/overview/flamegraph/`).
-- **Note for proposal E:** `dagre` is the *layout* library — it computes node positions for an acyclic graph. The actual SVG rendering is hand-rolled in `dagre.component.ts` using `d3` selections. This is why the minimap proposal is feasible without an engine swap: the rendering is already under the dashboard's control.
+- `d3` is used for the DAG (`components/dagre/`) and the flame graph (`pages/job/overview/flamegraph/`). Not directly relevant to the five proposals here.
 
 ### Where things live
 
@@ -56,7 +54,6 @@ flink-runtime-web/web-dashboard/src/app/
   app.component.{ts,html,less}            ← global header (proposal A, F)
   components/
     job-list/                              ← used by cluster home (proposal D)
-    dagre/                                 ← DAG rendering (proposal E)
   pages/
     overview/                              ← cluster home
     job/
@@ -82,7 +79,7 @@ flink-runtime-web/web-dashboard/src/app/
 
 ## Part 3 — `StatusService.refresh$`: the polling primitive
 
-Every live page in the dashboard subscribes to a single shared observable. Understanding it is mandatory for proposal A and useful context for all six.
+Every live page in the dashboard subscribes to a single shared observable. Understanding it is mandatory for proposal A and useful context for all five.
 
 The relevant code is `src/app/services/status.service.ts:43–75` and looks like:
 
@@ -126,7 +123,7 @@ What this gives you:
 
 **For proposal C (deep links):** charts already subscribe to this stream to drive their fetch loop. The deep-link button is a sibling of the chart and shares no state with the stream.
 
-**For all proposals:** if your new feature has live data, it subscribes to `statusService.refresh$`. If your feature is presentational only (a help modal, a static minimap), it doesn't.
+**For all proposals:** if your new feature has live data, it subscribes to `statusService.refresh$`. If your feature is presentational only (e.g., a help modal), it doesn't.
 
 ---
 
@@ -216,42 +213,7 @@ A single `web.metrics.prometheus-url: "..."` config string with `{metric}`, `{jo
 
 ---
 
-## Part 6 — The DAG (proposal E)
-
-### What dagre does
-
-`dagre` is a **layout** library. Input: a graph (nodes + edges). Output: positions for each node and bend points for each edge. It does Sugiyama-style layered layout — minimize edge crossings, sort nodes top-to-bottom by depth, line up siblings horizontally.
-
-The version in `package.json` is `dagre@0.8.5`, released ~2018. It works but is unmaintained. There are two common modern replacements:
-
-- `@dagrejs/dagre` — the same project under new maintainers. Drop-in for many cases.
-- `elkjs` — a port of Eclipse's ELK layout engine. More layout options, larger runtime.
-
-**Proposal E does not change the layout library.** It adds three affordances (minimap, zoom controls, search-and-pan) on top of whatever `dagre` outputs. The eventual swap is a separate effort.
-
-### What the dashboard's DAG component actually does
-
-`components/dagre/dagre.component.ts`:
-
-1. Builds a `dagre.graphlib.Graph` from the `JobDetail` REST response.
-2. Calls `dagre.layout(graph)` — returns positions.
-3. Renders the result as SVG using `d3` selections (one `<g>` per node, one `<path>` per edge).
-4. Handles zoom/pan via `d3-zoom` (in `components/svg-container/svg-container.component.ts`, scale extent `[0.1, 5]`).
-5. Exposes a vertical zoom slider in `dagre.component.html:103-111` bound to `zoomToLevel()`.
-6. Provides `graph.ts:zoomFocusLayout()` for "zoom and pan to a specific node" — already used on node click.
-7. Handles tooltips via `d3-tip`.
-
-What's *not* there: a minimap, and a way to find-by-name and pan to a vertex you haven't located visually. Both are small additions that reuse the existing zoom/focus plumbing — see proposal E.
-
-The minimap can be a *second* render of the same graph, scaled down 10×, with a viewport rectangle layered on top. Because the graph data and positions are already computed, the minimap is essentially a static SVG that copies the main one.
-
-### The performance cliff
-
-Past ~100 vertices, `dagre`'s layout quality degrades (long edges, awkward layering) and the SVG render time becomes noticeable. Proposal E doesn't help with layout — it helps with *navigation* once you're stuck in a too-large graph. Real layout fixes ride on top of an engine swap (gap #26 proper).
-
----
-
-## Part 7 — Keyboard shortcuts (proposal F context)
+## Part 6 — Keyboard shortcuts (proposal F context)
 
 Modern web apps have settled on a small consistent vocabulary:
 
@@ -296,7 +258,7 @@ Standard guard: skip when focus is in an `<input>`, `<textarea>`, or `[contented
 
 ---
 
-## Part 8 — Why each proposal is *one PR* in scope
+## Part 7 — Why each proposal is *one PR* in scope
 
 Common single-PR criteria, applied to each:
 
@@ -306,7 +268,6 @@ Common single-PR criteria, applied to each:
 | B. Subtask toolbar | None | None | None (new shared component) | ~300 |
 | C. Metric deep-links | None | Two new config keys | `Configuration` interface | ~200 |
 | D. Job list filter | None | Optional (`PipelineOptions`) | None | ~250 |
-| E. DAG minimap | None | None | None (new sibling component) | ~300 |
 | F. Keyboard shortcuts | None | None | New `KeyboardShortcutService` | ~250 |
 
 None of these:
@@ -320,7 +281,7 @@ This is the bar the bundle is designed to meet. The first 7 proposals are bigger
 
 ---
 
-## Part 9 — How these compose with the existing 7 proposals
+## Part 8 — How these compose with the existing 7 proposals
 
 | Composes with | How |
 |---|---|
@@ -328,15 +289,14 @@ This is the bar the bundle is designed to meet. The first 7 proposals are bigger
 | **B ↔ 02 (skew heatmap)** | Heatmap surfaces *which operator* is skewed; toolbar helps drill into *which subtask*. |
 | **C ↔ 05, 07** | Watermark / Kafka-lag charts are exactly the surfaces where "see the last 6 hours" is the next question. |
 | **D ↔ 06 (restart timeline)** | Filtering by tag composes with a per-job restart history. |
-| **E ↔ 04 (backpressure DAG overlay)** | Backpressure overlay is barely usable on a 100-vertex DAG without minimap. |
 | **F ↔ 03 (dark mode)** | Both are baseline-product-polish tier; bundling either signals the dashboard is being actively maintained. |
 
 ---
 
-## Part 10 — What we deliberately do *not* take on in this bundle
+## Part 9 — What we deliberately do *not* take on in this bundle
 
 - **Time-series storage.** Proposal C is a deep-link, not a history viewer. Building real history (gap #16) is multi-quarter.
-- **Layout-engine swap.** Proposal E adds affordances on top of dagre. Replacing dagre is a separate effort.
+- **DAG affordances.** The DAG already has zoom, drag-pan, and zoom-to-focus. A minimap and pan-by-name are tracked separately, not in this bundle.
 - **Tag / ownership backend.** Proposal D's first-class `pipeline.tags` option is the *minimum* backend addition; full ownership / RBAC is out of scope.
 - **a11y full pass.** Proposal F adds keyboard navigation but is not a complete a11y proposal. Gap #11 stays a separate ticket.
 - **Per-page customization.** Proposals A and B persist some preferences in `localStorage` but don't ship a "saved view" concept.
@@ -351,10 +311,9 @@ If any of these are still fuzzy, re-read the referenced section:
 
 1. What does `StatusService.refresh$` actually emit, and what triggers the emission? → Part 3.
 2. Why is proposal A's pause feature "free" given the existing topology? → Part 3.
-3. What's the difference between dagre's *layout* role and the dashboard's *render* code? → Part 6.
-4. Where do tags come from in proposal D, and what does the simple-vs-first-class path mean? → Part 4.
-5. Why deep-link instead of building a real history viewer? → Part 5.
-6. Why does proposal F's leader-key pattern need a 1.5s timeout? → Part 7.
+3. Where do tags come from in proposal D, and what does the simple-vs-first-class path mean? → Part 4.
+4. Why deep-link instead of building a real history viewer? → Part 5.
+5. Why does proposal F's leader-key pattern need a 1.5s timeout? → Part 6.
 
 ---
 
@@ -371,8 +330,6 @@ If any of these are still fuzzy, re-read the referenced section:
 - **Angular 20:** https://angular.dev/ — focus on Standalone components, Signals, OnPush, DestroyRef.
 - **RxJS:** https://rxjs.dev/ — `merge`, `switchMap`, `share`, `interval` are the operators that matter for proposal A.
 - **ng-zorro-antd:** https://ng.ant.design/ — `nz-table`, `nz-modal`, `nz-tag` for B/D/F.
-- **dagre:** https://github.com/dagrejs/dagre — layout primitives only.
-- **d3-zoom:** https://github.com/d3/d3-zoom — what proposal E's zoom buttons hook into.
 
 ### Flink REST + config
 
@@ -384,22 +341,19 @@ If any of these are still fuzzy, re-read the referenced section:
 
 - **GitHub keyboard shortcuts:** press `?` on any GitHub page; proposal F's leader-key vocabulary follows GitHub's exactly.
 - **Linear / Notion:** modern reference points for the `?` help-modal pattern.
-- **Grafana minimap:** for proposal E's pin-to-corner pattern.
-- **VS Code minimap:** the canonical "minimap of the document" UI; proposal E borrows the viewport-rectangle interaction.
 
 ### Project / contributor context
 
 - **Flink Jira:** https://issues.apache.org/jira/projects/FLINK — filter by component `Runtime / Web Frontend` for prior art on each.
-- **FLIP index:** https://cwiki.apache.org/confluence/display/FLINK/Flink+Improvement+Proposals — none of these six need a FLIP.
+- **FLIP index:** https://cwiki.apache.org/confluence/display/FLINK/Flink+Improvement+Proposals — none of these five need a FLIP.
 - **How to contribute:** https://flink.apache.org/how-to-contribute/
 
 ---
 
-## Suggested reading order (≈25 minutes)
+## Suggested reading order (≈20 minutes)
 
 1. The proposal file itself: `08-small-wins.md`. (10 min)
-2. Skim Part 3 of this doc — the `refresh$` topology unlocks proposal A and contextualizes A/B/C/D/E charts. (5 min)
+2. Skim Part 3 of this doc — the `refresh$` topology unlocks proposal A and contextualizes A/B/C/D charts. (5 min)
 3. Open `status.service.ts`, read the boot method end-to-end. (5 min)
-4. Open `components/dagre/dagre.component.ts`, skim the render method. (5 min)
 
-After that you have enough mechanical context to start any of the six.
+After that you have enough mechanical context to start any of the five.
