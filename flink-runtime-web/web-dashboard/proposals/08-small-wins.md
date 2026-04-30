@@ -14,9 +14,9 @@ The proposals share no dependencies on each other and can ship in any order or i
 | B | Subtask-table power tools | partial #3, #12 | ~300 | per-job |
 | C | Metric deep-links | (new — bridges #16) | ~200 | metric-bearing pages |
 | D | Job list search & tags | partial #21 | ~250 | cluster home |
-| F | Keyboard shortcuts | (new) | ~250 | every page |
+| E | Keyboard shortcuts | (new) | ~250 | every page |
 
-Order recommended for impact-per-day-of-work: **C → B → A → D → F**.
+Order recommended for impact-per-day-of-work: **C → B → A → D → E**.
 
 ---
 
@@ -301,7 +301,7 @@ If the dashboard knows the current user (via `web.access-control-allow-origin` r
 
 ---
 
-## F. Keyboard shortcuts & shortcut help (`?`)
+## E. Keyboard shortcuts & shortcut help (`?`)
 
 ### Pitch
 
@@ -369,7 +369,7 @@ Bottom-of-page "?" hint chip, dismissible, persists dismissal in `localStorage`.
 ## Cross-cutting notes
 
 - Each proposal is a separate Jira ticket / separate PR. Bundling them into one PR is tempting (they all touch shared headers) but multiplies review surface.
-- Four of the five (A, B, D, F) are pure-frontend. Only C touches backend (two new config keys in `WebOptions`).
+- Four of the five (A, B, D, E) are pure-frontend. Only C touches backend (two new config keys in `WebOptions`).
 - None require a FLIP. C *might* benefit from a short dev@ note ("planning to add `web.metrics.prometheus-url` config keys") to surface conflicts.
 - All compose cleanly with the existing 7 proposals — see the `Composes with` notes on each.
 

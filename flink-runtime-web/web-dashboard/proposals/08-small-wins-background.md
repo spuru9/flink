@@ -40,7 +40,7 @@ If you've worked on Spark UI or any internal admin dashboard from the last decad
 
 - The UI component library. Tables, tabs, drawers, buttons, modals, tags, dropdowns.
 - Theming via LESS variables (which is exactly why proposal 03 dark-mode is so much work — see that proposal).
-- For these five proposals, the relevant ng-zorro components are: `nz-table` (B, D), `nz-input` (B, D, F), `nz-tag` (D), `nz-modal` (F), `nz-tooltip` (C), `nz-dropdown` (A).
+- For these five proposals, the relevant ng-zorro components are: `nz-table` (B, D), `nz-input` (B, D, E), `nz-tag` (D), `nz-modal` (E), `nz-tooltip` (C), `nz-dropdown` (A).
 
 ### @antv/g2 and d3
 
@@ -51,7 +51,7 @@ If you've worked on Spark UI or any internal admin dashboard from the last decad
 
 ```
 flink-runtime-web/web-dashboard/src/app/
-  app.component.{ts,html,less}            ← global header (proposal A, F)
+  app.component.{ts,html,less}            ← global header (proposal A, E)
   components/
     job-list/                              ← used by cluster home (proposal D)
   pages/
@@ -213,7 +213,7 @@ A single `web.metrics.prometheus-url: "..."` config string with `{metric}`, `{jo
 
 ---
 
-## Part 6 — Keyboard shortcuts (proposal F context)
+## Part 6 — Keyboard shortcuts (proposal E context)
 
 Modern web apps have settled on a small consistent vocabulary:
 
@@ -222,7 +222,7 @@ Modern web apps have settled on a small consistent vocabulary:
 - `/` focuses search input (GitHub, Slack, Twitter).
 - `Esc` closes modals and drawers (universal).
 
-Proposal F follows this convention exactly so an operator coming from any of those tools recognizes it instantly.
+Proposal E follows this convention exactly so an operator coming from any of those tools recognizes it instantly.
 
 ### The leader-key pattern
 
@@ -268,7 +268,7 @@ Common single-PR criteria, applied to each:
 | B. Subtask toolbar | None | None | None (new shared component) | ~300 |
 | C. Metric deep-links | None | Two new config keys | `Configuration` interface | ~200 |
 | D. Job list filter | None | Optional (`PipelineOptions`) | None | ~250 |
-| F. Keyboard shortcuts | None | None | New `KeyboardShortcutService` | ~250 |
+| E. Keyboard shortcuts | None | None | New `KeyboardShortcutService` | ~250 |
 
 None of these:
 
@@ -289,7 +289,7 @@ This is the bar the bundle is designed to meet. The first 7 proposals are bigger
 | **B ↔ 02 (skew heatmap)** | Heatmap surfaces *which operator* is skewed; toolbar helps drill into *which subtask*. |
 | **C ↔ 05, 07** | Watermark / Kafka-lag charts are exactly the surfaces where "see the last 6 hours" is the next question. |
 | **D ↔ 06 (restart timeline)** | Filtering by tag composes with a per-job restart history. |
-| **F ↔ 03 (dark mode)** | Both are baseline-product-polish tier; bundling either signals the dashboard is being actively maintained. |
+| **E ↔ 03 (dark mode)** | Both are baseline-product-polish tier; bundling either signals the dashboard is being actively maintained. |
 
 ---
 
@@ -298,7 +298,7 @@ This is the bar the bundle is designed to meet. The first 7 proposals are bigger
 - **Time-series storage.** Proposal C is a deep-link, not a history viewer. Building real history (gap #16) is multi-quarter.
 - **DAG affordances.** The DAG already has zoom, drag-pan, and zoom-to-focus. A minimap and pan-by-name are tracked separately, not in this bundle.
 - **Tag / ownership backend.** Proposal D's first-class `pipeline.tags` option is the *minimum* backend addition; full ownership / RBAC is out of scope.
-- **a11y full pass.** Proposal F adds keyboard navigation but is not a complete a11y proposal. Gap #11 stays a separate ticket.
+- **a11y full pass.** Proposal E adds keyboard navigation but is not a complete a11y proposal. Gap #11 stays a separate ticket.
 - **Per-page customization.** Proposals A and B persist some preferences in `localStorage` but don't ship a "saved view" concept.
 
 Each of these is a known follow-up; explicitly *not* attempting them keeps the bundle in single-PR-per-proposal scope.
@@ -313,7 +313,7 @@ If any of these are still fuzzy, re-read the referenced section:
 2. Why is proposal A's pause feature "free" given the existing topology? → Part 3.
 3. Where do tags come from in proposal D, and what does the simple-vs-first-class path mean? → Part 4.
 4. Why deep-link instead of building a real history viewer? → Part 5.
-5. Why does proposal F's leader-key pattern need a 1.5s timeout? → Part 6.
+5. Why does proposal E's leader-key pattern need a 1.5s timeout? → Part 6.
 
 ---
 
@@ -329,7 +329,7 @@ If any of these are still fuzzy, re-read the referenced section:
 
 - **Angular 20:** https://angular.dev/ — focus on Standalone components, Signals, OnPush, DestroyRef.
 - **RxJS:** https://rxjs.dev/ — `merge`, `switchMap`, `share`, `interval` are the operators that matter for proposal A.
-- **ng-zorro-antd:** https://ng.ant.design/ — `nz-table`, `nz-modal`, `nz-tag` for B/D/F.
+- **ng-zorro-antd:** https://ng.ant.design/ — `nz-table`, `nz-modal`, `nz-tag` for B/D/E.
 
 ### Flink REST + config
 
@@ -339,7 +339,7 @@ If any of these are still fuzzy, re-read the referenced section:
 
 ### UX prior art
 
-- **GitHub keyboard shortcuts:** press `?` on any GitHub page; proposal F's leader-key vocabulary follows GitHub's exactly.
+- **GitHub keyboard shortcuts:** press `?` on any GitHub page; proposal E's leader-key vocabulary follows GitHub's exactly.
 - **Linear / Notion:** modern reference points for the `?` help-modal pattern.
 
 ### Project / contributor context
