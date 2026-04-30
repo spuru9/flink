@@ -236,8 +236,12 @@ The version in `package.json` is `dagre@0.8.5`, released ~2018. It works but is 
 1. Builds a `dagre.graphlib.Graph` from the `JobDetail` REST response.
 2. Calls `dagre.layout(graph)` — returns positions.
 3. Renders the result as SVG using `d3` selections (one `<g>` per node, one `<path>` per edge).
-4. Handles zoom/pan via `d3-zoom` (inherits a default zoom behavior; no custom controls).
-5. Handles tooltips via `d3-tip`.
+4. Handles zoom/pan via `d3-zoom` (in `components/svg-container/svg-container.component.ts`, scale extent `[0.1, 5]`).
+5. Exposes a vertical zoom slider in `dagre.component.html:103-111` bound to `zoomToLevel()`.
+6. Provides `graph.ts:zoomFocusLayout()` for "zoom and pan to a specific node" — already used on node click.
+7. Handles tooltips via `d3-tip`.
+
+What's *not* there: a minimap, and a way to find-by-name and pan to a vertex you haven't located visually. Both are small additions that reuse the existing zoom/focus plumbing — see proposal E.
 
 The minimap can be a *second* render of the same graph, scaled down 10×, with a viewport rectangle layered on top. Because the graph data and positions are already computed, the minimap is essentially a static SVG that copies the main one.
 

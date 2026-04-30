@@ -14,7 +14,7 @@ The proposals share no dependencies on each other and can ship in any order or i
 | B | Subtask-table power tools | partial #3, #12 | ~300 | per-job |
 | C | Metric deep-links | (new — bridges #16) | ~200 | metric-bearing pages |
 | D | Job list search & tags | partial #21 | ~250 | cluster home |
-| E | DAG minimap & zoom-to-fit | partial #26 | ~300 | per-job |
+| E | DAG minimap & pan-to-vertex | partial #26 | ~200 | per-job |
 | F | Keyboard shortcuts | (new) | ~250 | every page |
 
 Order recommended for impact-per-day-of-work: **C → B → A → D → E → F**.
@@ -302,22 +302,30 @@ If the dashboard knows the current user (via `web.access-control-allow-origin` r
 
 ---
 
-## E. DAG minimap, zoom-to-fit, and pan affordance
+## E. DAG minimap & pan-to-vertex search
 
 ### Pitch
 
-Gap #26 in `00-peer-comparison-and-gaps.md` flags `dagre@0.8.5` as a 5-yr-stale meta-blocker. The full engine swap is multi-month. **Minimap + zoom controls + pan affordance** are a small wrapper *on top of* the existing dagre engine — visible on every job page, days of work, no engine swap. They de-risk the eventual swap by establishing the UX targets ahead of time.
+Gap #26 in `00-peer-comparison-and-gaps.md` flags `dagre@0.8.5` as a 5-yr-stale meta-blocker. The full engine swap is multi-month. **Minimap + pan-to-vertex search** are a small wrapper *on top of* the existing dagre engine — visible on every job page, days of work, no engine swap. They de-risk the eventual swap by establishing the UX targets ahead of time.
+
+### What already exists
+
+The dashboard's dagre layer already has decent zoom plumbing — important context to avoid duplicating it:
+
+- **Zoom slider** — `dagre.component.html:103-111` renders an `nz-slider` (vertical, range `[0.1, 5]`) bound to `dagre.component.ts:zoomToLevel()`.
+- **Pan via drag** — `svg-container.component.ts` wires `d3-zoom` (lines 77–90); the user can drag the canvas around.
+- **Zoom-to-focus** — `graph.ts:zoomFocusLayout()` (line 219) computes a transform that focuses on a chosen vertex; called from `dagre.component.ts:290`. This is effectively "zoom-to-fit" for a single node and is already wired to node-click.
+
+So this proposal is **not** about adding zoom controls. They're done. What's missing is *navigational orientation* on a large DAG: a minimap and a way to pan-to-a-named vertex.
 
 ### Problem
 
-Today's `dagre.component.ts`:
+What the existing affordances don't give you on a 100-vertex DAG:
 
-- No minimap. Past ~30 vertices, the user is scrolling a viewport with no overview of where they are.
-- No zoom controls — the user pinches the trackpad and hopes.
-- No "fit to viewport" button after zoom.
-- No "highlight + pan to" for a search hit.
+- No minimap. The slider sets the zoom level but you still don't know *where in the graph* you are. Past ~30 vertices, the user scrolls a viewport with no overview.
+- No "highlight + pan to" for a search hit. You can scroll, you can zoom — you can't say "show me the operator named `KeyedAgg`."
 
-Every other gap that touches the DAG (proposal 04 backpressure overlay, gap #21 fleet view, gap #22 job-to-job diff) inherits this surface limitation. Improving the affordances here is leverage.
+Every other gap that touches the DAG (proposal 04 backpressure overlay, gap #21 fleet view, gap #22 job-to-job diff) inherits this surface limitation.
 
 ### Proposal
 
@@ -326,35 +334,27 @@ Every other gap that touches the DAG (proposal 04 backpressure overlay, gap #21 
 A 200×120 px box pinned to the bottom-right of the DAG canvas:
 
 - A miniature SVG of the same graph, ~10% scale, no labels.
-- A draggable viewport rectangle showing the user's current scroll/zoom window.
-- Click anywhere on the minimap → pans the main view to that location.
+- A draggable viewport rectangle showing the user's current pan/zoom window — derived from the existing `transformEvent` (`dagre.component.html:27`) the host already emits.
+- Click anywhere on the minimap → pans the main view to that location (calls into the existing `svgContainer.zoomController.transform`).
 
-#### 2. Zoom controls
+#### 2. Pan-to-vertex search
 
-Three icon buttons: `[+] [−] [⊙ fit]`.
+A search input above the DAG. Type → matches against vertex names → first match highlights with a halo and pans into view by reusing `zoomFocusLayout()` — which already does the focus-and-transform math.
 
-- `+` / `−`: 1.25× / 0.8× zoom around the current center.
-- `⊙ fit`: reset zoom to fit the entire DAG in the viewport.
+#### 3. Persistence (optional)
 
-#### 3. Pan-to-vertex search
-
-A search input above the DAG. Type → matches against vertex names → first match highlights with a halo and pans into view.
-
-#### 4. Persistence
-
-Zoom level and last-pan position persist per-job in `localStorage`. Coming back to a 200-vertex job restores your last viewing context.
+Last-pan position persists per-job in `localStorage`. Coming back to a 200-vertex job restores your last viewing context. Skip if it's not free; the minimap mostly removes the need for this.
 
 ### Implementation sketch
 
-- All three sit on top of `dagre`'s output positions; no engine change.
-- New component: `src/app/components/dagre/components/minimap/`. Renders a re-scaled clone of the same `<svg>` content from `dagre.component.ts` graph state.
-- Zoom buttons hook into the existing transform on the SVG root.
-- "Fit" computes `bbox(graph)` from `dagre`'s positioned nodes, picks scale and translate.
-- Search-and-pan: vertex name → look up node position → set transform to center it.
+- New component: `src/app/components/dagre/components/minimap/minimap.component.ts`. Renders a re-scaled clone of the same `<svg>` content from `dagre.component.ts` graph state.
+- Subscribes to the existing `transformEvent` from `flink-svg-container` to keep the viewport rectangle in sync.
+- Click handler on the minimap → computes target transform → calls `svgContainer.zoomController.transform`.
+- Search input lives in `dagre.component.html` next to the existing checkbox; `(submit)` calls a thin wrapper around `graph.zoomFocusLayout()`.
 
 ### Scope
 
-~300 LOC (minimap component, zoom controls, pan-to-vertex search, persistence).
+~200 LOC (minimap component, pan-to-vertex search, optional persistence). Smaller than initially scoped because zoom controls and focus-zoom math already exist.
 
 ### Impact
 
@@ -365,7 +365,7 @@ Zoom level and last-pan position persist per-job in `localStorage`. Coming back 
 ### Risks
 
 - Performance on very large DAGs (1000+ vertices) — minimap re-renders on every pan. Mitigation: render minimap once, only the viewport rectangle moves.
-- Zoom + sticky tooltips can fight; existing `d3-tip` uses absolute positioning. Validate during implementation.
+- Minimap and `d3-tip` tooltips can fight if the minimap overlays a node region. Z-index and pointer-events need a quick check.
 
 ### Open questions
 
