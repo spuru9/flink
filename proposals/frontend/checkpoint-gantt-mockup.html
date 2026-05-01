@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Flink Dashboard — Checkpoint Gantt Mockup</title>
+<style>
+  :root {
+    --fg: #262626;
+    --fg-muted: #8c8c8c;
+    --border: #f0f0f0;
+    --border-strong: #d9d9d9;
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --primary: #1890ff;
+    --start-delay: #bfbfbf;
+    --alignment: #91d5ff;
+    --sync: #faad14;
+    --async: #52c41a;
+    --failed: #ff4d4f;
+    --straggler: #ff4d4f;
+    --savepoint: #722ed1;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--fg);
+    background: var(--bg-soft);
+  }
+  .shell {
+    max-width: 1280px;
+    margin: 24px auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+  }
+  .tab {
+    padding: 12px 16px;
+    color: var(--fg-muted);
+    cursor: default;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 500;
+  }
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .toolbar h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .toggle {
+    display: inline-flex;
+    border: 1px solid var(--border-strong);
+    border-radius: 2px;
+    overflow: hidden;
+    font-size: 12px;
+  }
+  .toggle button {
+    appearance: none;
+    background: var(--bg);
+    border: 0;
+    padding: 4px 12px;
+    cursor: pointer;
+    color: var(--fg-muted);
+    font: inherit;
+  }
+  .toggle button.active {
+    background: var(--primary);
+    color: #fff;
+  }
+  .section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section h3 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+  }
+  .section .caption {
+    color: var(--fg-muted);
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  /* legend */
+  .legend {
+    display: inline-flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin-bottom: 12px;
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* tooltip */
+  .tip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.82);
+    color: #fff;
+    padding: 6px 9px;
+    border-radius: 2px;
+    font-size: 11px;
+    line-height: 1.4;
+    display: none;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .tip strong { color: #fff; }
+
+  /* svg text defaults */
+  svg { display: block; }
+  svg text { font-size: 11px; fill: var(--fg); font-family: inherit; }
+  svg text.muted { fill: var(--fg-muted); }
+  svg text.label { fill: var(--fg); }
+  svg text.axis { fill: var(--fg-muted); font-size: 10px; }
+  svg text.opHeader { font-weight: 500; font-size: 12px; }
+
+  .row-highlight {
+    fill: #fff7e6;
+  }
+  .straggler-chip {
+    font-size: 10px;
+    fill: var(--straggler);
+    font-weight: 500;
+  }
+
+  .subtitle {
+    color: var(--fg-muted);
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="tabs">
+    <div class="tab">Overview</div>
+    <div class="tab">History</div>
+    <div class="tab">Summary</div>
+    <div class="tab active">Gantt</div>
+    <div class="tab">Configuration</div>
+  </div>
+
+  <div class="toolbar">
+    <h2>Checkpoints <span class="subtitle">Job: ClickstreamPipeline &middot; 21 vertices</span></h2>
+    <div class="toggle">
+      <button class="active">Gantt</button>
+      <button>Table</button>
+    </div>
+  </div>
+
+  <!-- RECENT CHECKPOINTS STRIP -->
+  <div class="section">
+    <h3>Recent checkpoints <span class="subtitle">last 10 &middot; click one to inspect</span></h3>
+    <div class="caption">Bar width &prop; duration &middot; dashed line = configured timeout (60&nbsp;s)</div>
+    <svg id="strip" width="1200" height="120" viewBox="0 0 1200 120"></svg>
+  </div>
+
+  <!-- PER-CHECKPOINT GANTT -->
+  <div class="section">
+    <h3>Checkpoint #147 <span class="subtitle">triggered 2026-04-23 10:14:32.108 &middot; end-to-end 8.40 s &middot; 11 of 11 subtasks ack&rsquo;d</span></h3>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--start-delay)"></span>start_delay</span>
+      <span><span class="swatch" style="background:var(--alignment)"></span>alignment.duration</span>
+      <span><span class="swatch" style="background:var(--sync)"></span>checkpoint.sync</span>
+      <span><span class="swatch" style="background:var(--async)"></span>checkpoint.async</span>
+      <span><span class="swatch" style="background:var(--straggler); opacity:.2; border:1px solid var(--straggler)"></span>&gt; p95 (straggler)</span>
+    </div>
+    <svg id="gantt" width="1200" height="420" viewBox="0 0 1200 420"></svg>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+  // ---- strip data: recent checkpoints -----
+  const strip = [
+    { id: 142, dur: 4200,  status: 'completed' },
+    { id: 143, dur: 3100,  status: 'completed' },
+    { id: 144, dur: 2800,  status: 'completed' },
+    { id: 145, dur: 13800, status: 'completed' },
+    { id: 146, dur: 4100,  status: 'completed' },
+    { id: 147, dur: 8400,  status: 'completed', selected: true },
+    { id: 148, dur: 3300,  status: 'completed' },
+    { id: 149, dur: 4000,  status: 'completed' },
+    { id: 150, dur: 5200,  status: 'savepoint' },
+    { id: 151, dur: null,  status: 'failed' },
+  ];
+
+  // ---- gantt data: subtasks for checkpoint #147 ----
+  // times in ms, matching CompletedSubTaskCheckpointStatistics field names
+  const subtasks = [
+    { op: 'Source: KafkaSource',    i: 0, start_delay: 50,  alignment: 20,  sync: 100, async_: 150 },
+    { op: 'Source: KafkaSource',    i: 1, start_delay: 50,  alignment: 25,  sync: 110, async_: 160 },
+    { op: 'Filter',                 i: 0, start_delay: 80,  alignment: 60,  sync: 180, async_: 200 },
+    { op: 'Filter',                 i: 1, start_delay: 80,  alignment: 65,  sync: 175, async_: 210 },
+    { op: 'KeyedAgg',               i: 0, start_delay: 120, alignment: 200, sync: 350, async_: 400 },
+    { op: 'KeyedAgg',               i: 1, start_delay: 120, alignment: 450, sync: 900, async_: 6900, straggler: true },
+    { op: 'KeyedAgg',               i: 2, start_delay: 120, alignment: 210, sync: 360, async_: 410 },
+    { op: 'TumblingWindow',         i: 0, start_delay: 180, alignment: 280, sync: 240, async_: 200 },
+    { op: 'TumblingWindow',         i: 1, start_delay: 180, alignment: 290, sync: 235, async_: 205 },
+    { op: 'Sink: JDBCSink',         i: 0, start_delay: 220, alignment: 310, sync: 180, async_: 150 },
+    { op: 'Sink: JDBCSink',         i: 1, start_delay: 220, alignment: 315, sync: 175, async_: 155 },
+  ];
+
+  // ------ render strip ------
+  (function renderStrip() {
+    const svg = document.getElementById('strip');
+    const padL = 20, padR = 20, padT = 16, padB = 40;
+    const w = 1200, h = 120;
+    const inner = w - padL - padR;
+    const n = strip.length;
+    const slotW = inner / n;
+    const barW = slotW * 0.72;
+    const maxDur = 14000; // ms cap for visual
+    const timeoutDur = 60000;
+    const availH = h - padT - padB;
+
+    // timeout line (dashed) — position where 60 s would be on capped scale
+    // since we cap the visible at 14s, real timeout is off-screen; draw a faint marker label instead.
+    let html = '';
+
+    // baseline
+    html += `<line x1="${padL}" x2="${w - padR}" y1="${h - padB + 0.5}" y2="${h - padB + 0.5}" stroke="#e8e8e8"/>`;
+
+    strip.forEach((c, idx) => {
+      const cx = padL + slotW * idx + slotW / 2;
+      let barHeight, fill, strokeWidth = 0, stroke = 'none';
+      if (c.status === 'failed') {
+        barHeight = availH;
+        fill = 'var(--failed)';
+      } else {
+        const d = Math.min(c.dur, maxDur);
+        barHeight = (d / maxDur) * availH;
+        fill = c.status === 'savepoint' ? 'var(--savepoint)' : 'var(--async)';
+      }
+      if (c.selected) {
+        strokeWidth = 2;
+        stroke = 'var(--primary)';
+      }
+
+      const x = cx - barW / 2;
+      const y = h - padB - barHeight;
+
+      const tipPayload = c.status === 'failed'
+        ? `#${c.id} — <strong>FAILED</strong><br/>timeout / error`
+        : `#${c.id}${c.status === 'savepoint' ? ' — <strong>savepoint</strong>' : ''}<br/>duration: ${(c.dur/1000).toFixed(2)} s<br/>status: ${c.status}`;
+
+      html += `<rect x="${x}" y="${y}" width="${barW}" height="${barHeight}" rx="1" fill="${fill}"
+                   stroke="${stroke}" stroke-width="${strokeWidth}"
+                   data-tip="${encodeURIComponent(tipPayload)}"/>`;
+
+      // id label
+      html += `<text x="${cx}" y="${h - padB + 14}" text-anchor="middle" class="axis">#${c.id}</text>`;
+      // duration
+      const durLbl = c.status === 'failed' ? '—' : (c.dur / 1000).toFixed(1) + 's';
+      html += `<text x="${cx}" y="${h - padB + 28}" text-anchor="middle" class="muted" style="font-size:10px">${durLbl}</text>`;
+      // savepoint marker
+      if (c.status === 'savepoint') {
+        html += `<text x="${cx}" y="${y - 4}" text-anchor="middle" style="font-size:10px;fill:var(--savepoint)">◆ sp</text>`;
+      }
+      // fail marker
+      if (c.status === 'failed') {
+        html += `<text x="${cx}" y="${y - 4}" text-anchor="middle" style="font-size:10px;fill:var(--failed)">× fail</text>`;
+      }
+      // selected marker
+      if (c.selected) {
+        html += `<text x="${cx}" y="${y - 4}" text-anchor="middle" style="font-size:10px;fill:var(--primary);font-weight:500">▾ inspecting</text>`;
+      }
+    });
+
+    svg.innerHTML = html;
+    attachTips(svg);
+  })();
+
+  // ------ render gantt ------
+  (function renderGantt() {
+    const svg = document.getElementById('gantt');
+    const padL = 180, padR = 24, padT = 12, padB = 32;
+    const w = 1200, h = 420;
+    const rowH = 22;
+    const inner = w - padL - padR;
+
+    const maxMs = 9000; // headroom past the straggler's 8.37s total
+    const xOf = ms => padL + (ms / maxMs) * inner;
+
+    let html = '';
+
+    // axis ticks
+    const ticks = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000];
+    ticks.forEach(t => {
+      const x = xOf(t);
+      html += `<line x1="${x}" x2="${x}" y1="${padT}" y2="${h - padB}" stroke="#f5f5f5"/>`;
+      html += `<text x="${x}" y="${h - padB + 14}" text-anchor="middle" class="axis">${t === 0 ? '0' : (t / 1000) + 's'}</text>`;
+    });
+    html += `<text x="${padL + inner}" y="${h - padB + 28}" text-anchor="end" class="muted" style="font-size:10px">wall-clock since trigger</text>`;
+
+    // group subtasks by operator, preserving order
+    const groups = [];
+    const seen = new Map();
+    subtasks.forEach(s => {
+      if (!seen.has(s.op)) { seen.set(s.op, groups.length); groups.push({ op: s.op, rows: [] }); }
+      groups[seen.get(s.op)].rows.push(s);
+    });
+
+    let y = padT + 4;
+    groups.forEach(g => {
+      // operator header
+      html += `<text x="16" y="${y + 14}" class="opHeader">${g.op}</text>`;
+      // totals for group
+      const max = Math.max(...g.rows.map(r => r.start_delay + r.alignment + r.sync + r.async_));
+      html += `<text x="${padL - 8}" y="${y + 14}" text-anchor="end" class="muted" style="font-size:10px">max ${(max/1000).toFixed(2)}s</text>`;
+      y += rowH;
+
+      g.rows.forEach(r => {
+        const total = r.start_delay + r.alignment + r.sync + r.async_;
+        // highlight row for straggler
+        if (r.straggler) {
+          html += `<rect x="0" y="${y - 2}" width="${w}" height="${rowH - 2}" class="row-highlight"/>`;
+        }
+        // subtask label
+        html += `<text x="${padL - 10}" y="${y + 14}" text-anchor="end" class="label">[${r.i}]</text>`;
+
+        // segments
+        let cursor = 0;
+        const seg = (len, cls, label) => {
+          const x1 = xOf(cursor), x2 = xOf(cursor + len);
+          const tip = `<strong>${g.op}[${r.i}]</strong><br/>${label}: ${len} ms<br/>total: ${total} ms`;
+          html += `<rect x="${x1}" y="${y + 2}" width="${Math.max(x2 - x1, 1)}" height="${rowH - 6}" fill="var(${cls})"
+                         data-tip="${encodeURIComponent(tip)}"/>`;
+          cursor += len;
+        };
+        seg(r.start_delay, '--start-delay', 'start_delay');
+        seg(r.alignment,   '--alignment',   'alignment.duration');
+        seg(r.sync,        '--sync',        'checkpoint.sync');
+        seg(r.async_,      '--async',       'checkpoint.async');
+
+        // straggler outline + chip
+        if (r.straggler) {
+          const x1 = xOf(0), x2 = xOf(total);
+          html += `<rect x="${x1 - 1}" y="${y + 1}" width="${x2 - x1 + 2}" height="${rowH - 4}" fill="none"
+                         stroke="var(--straggler)" stroke-width="1.2" stroke-dasharray="3 2" rx="1"/>`;
+          html += `<text x="${xOf(total) + 8}" y="${y + 14}" class="straggler-chip">straggler &middot; ${(total/1000).toFixed(2)}s</text>`;
+        } else {
+          // total time at end
+          html += `<text x="${xOf(total) + 6}" y="${y + 14}" class="muted" style="font-size:10px">${total} ms</text>`;
+        }
+
+        y += rowH;
+      });
+      y += 4; // gap between groups
+    });
+
+    svg.innerHTML = html;
+    attachTips(svg);
+  })();
+
+  // ------ tooltip wiring ------
+  function attachTips(root) {
+    const tip = document.getElementById('tip');
+    root.querySelectorAll('[data-tip]').forEach(el => {
+      el.addEventListener('mouseenter', (e) => {
+        tip.innerHTML = decodeURIComponent(el.getAttribute('data-tip'));
+        tip.style.display = 'block';
+      });
+      el.addEventListener('mousemove', (e) => {
+        tip.style.left = (e.clientX + 12) + 'px';
+        tip.style.top  = (e.clientY + 12) + 'px';
+      });
+      el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    });
+  }
+</script>
+</body>
+</html>
