@@ -2,7 +2,7 @@
 
 **Area:** `flink-runtime-web` — Web Dashboard
 **Status:** Proposal
-**Mockup:** `../checkpoint-gantt-mockup.html` (open in browser)
+**Mockup:** `checkpoint-gantt-mockup.html` (open in browser)
 
 ## Pitch
 

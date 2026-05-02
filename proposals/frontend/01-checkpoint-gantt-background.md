@@ -552,7 +552,7 @@ If any of these are still fuzzy, re-read the referenced section:
 1. **Stateful Stream Processing** concept page — internalizes state and why checkpoints exist. (15 min)
 2. **Checkpointing under backpressure** — explains alignment, unaligned mode, and why the four phases look the way they do. (10 min)
 3. The proposal itself: `01-checkpoint-gantt.md`. (5 min)
-4. The mockup: `../checkpoint-gantt-mockup.html`, opened in a browser. (5 min)
+4. The mockup: `checkpoint-gantt-mockup.html`, opened in a browser. (5 min)
 5. Re-read Part 5 of this doc ("Four phases"). It lands differently after the two Flink pages above. (5 min)
 6. Skim the Carbone paper if you want the algorithmic foundation. (5 min)
 
