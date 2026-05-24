@@ -26,6 +26,7 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -36,7 +37,9 @@ import { JobDetailCorrect, NodesItemCorrect, WatermarkSample } from '@flink-runt
 import { WatermarkLagHistoryService } from '@flink-runtime-web/services';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 import { JobLocalService } from '../job-local.service';
 
@@ -60,13 +63,25 @@ interface ChartPoint {
   templateUrl: './job-watermarks.component.html',
   styleUrls: ['./job-watermarks.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, NgFor, DecimalPipe, NzCardModule, NzEmptyModule, NzTagModule, LagSparklineComponent]
+  imports: [
+    NgIf,
+    NgFor,
+    DecimalPipe,
+    FormsModule,
+    NzCardModule,
+    NzEmptyModule,
+    NzSwitchModule,
+    NzTagModule,
+    NzToolTipModule,
+    LagSparklineComponent
+  ]
 })
 export class JobWatermarksComponent implements AfterViewInit, OnDestroy {
   public cards: VertexCard[] = [];
   public selectedVertexId: string | null = null;
   public hasAnyData = false;
   public thresholdSeconds = 60;
+  public persistEnabled = false;
 
   @ViewChild('chartContainer', { static: true }) private readonly chartContainer: ElementRef<HTMLElement>;
 
@@ -94,6 +109,18 @@ export class JobWatermarksComponent implements AfterViewInit, OnDestroy {
       .changes$()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.refreshView());
+
+    this.history
+      .persistenceEnabled$()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(enabled => {
+        this.persistEnabled = enabled;
+        this.cdr.markForCheck();
+      });
+  }
+
+  public togglePersist(enabled: boolean): void {
+    this.history.setPersistenceEnabled(enabled);
   }
 
   public ngOnDestroy(): void {

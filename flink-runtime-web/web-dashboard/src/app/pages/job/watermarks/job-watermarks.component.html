@@ -20,7 +20,21 @@
   <div class="chart-pane">
     <div class="chart-header">
       <span class="title">Watermark lag</span>
-      <span class="threshold">alert &gt; {{ thresholdSeconds }}s</span>
+      <span class="header-controls">
+        <label
+          class="persist-toggle"
+          nz-tooltip
+          nzTooltipTitle="Save the rolling 30-min history to browser storage so it survives page refresh. Cleared when the job ID changes."
+        >
+          <nz-switch
+            nzSize="small"
+            [ngModel]="persistEnabled"
+            (ngModelChange)="togglePersist($event)"
+          ></nz-switch>
+          <span class="persist-label">Remember across refresh</span>
+        </label>
+        <span class="threshold">alert &gt; {{ thresholdSeconds }}s</span>
+      </span>
     </div>
     <div class="chart-host" #chartContainer></div>
     <div class="chart-empty" *ngIf="!hasAnyData">

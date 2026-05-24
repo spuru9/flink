@@ -33,10 +33,16 @@ import { StatusService } from './status.service';
  *
  * Self-polls via `statusService.refresh$` while at least one consumer is
  * tracking. When the last consumer releases, polling halts.
+ *
+ * Optional localStorage persistence survives browser refresh / tab close
+ * for the *same* jobId. Toggled at runtime by the user.
  */
 @Injectable({ providedIn: 'root' })
 export class WatermarkLagHistoryService {
   private static readonly RETENTION_MS = 30 * 60 * 1000;
+  private static readonly PERSIST_FLAG_KEY = 'flink:watermark-lag:persist';
+  private static readonly PERSIST_DATA_KEY_PREFIX = 'flink:watermark-lag:samples:';
+  private static readonly PERSIST_WRITE_DEBOUNCE_MS = 2_000;
 
   private readonly metricsService = inject(MetricsService);
   private readonly statusService = inject(StatusService);
@@ -49,17 +55,18 @@ export class WatermarkLagHistoryService {
   private pollSub: Subscription | null = null;
   private refCount = 0;
 
-  /**
-   * Start tracking watermark lag for the given vertices. Returns a teardown
-   * function the caller must invoke when finished (typically in ngOnDestroy).
-   * Multiple callers are supported; polling stops only when the last one
-   * releases.
-   */
+  private readonly persistEnabled$ = new BehaviorSubject<boolean>(this.readPersistFlag());
+  private persistWriteTimer: ReturnType<typeof setTimeout> | null = null;
+
   public track(jobId: string, vertexIds: readonly string[]): () => void {
-    if (this.currentJobId !== jobId) {
+    const jobChanged = this.currentJobId !== jobId;
+    if (jobChanged) {
       this.currentJobId = jobId;
       this.seriesByVertex.clear();
       this.currentVertexIds = [...vertexIds];
+      if (this.persistEnabled$.value) {
+        this.hydrateFromStorage(jobId);
+      }
       this.tick$.next(this.tick$.value + 1);
     } else {
       const merged = new Set<string>(this.currentVertexIds);
@@ -86,6 +93,29 @@ export class WatermarkLagHistoryService {
 
   public changes$(): Observable<number> {
     return this.tick$.asObservable();
+  }
+
+  public persistenceEnabled$(): Observable<boolean> {
+    return this.persistEnabled$.asObservable();
+  }
+
+  public isPersistenceEnabled(): boolean {
+    return this.persistEnabled$.value;
+  }
+
+  public setPersistenceEnabled(enabled: boolean): void {
+    if (this.persistEnabled$.value === enabled) {
+      return;
+    }
+    this.persistEnabled$.next(enabled);
+    this.writePersistFlag(enabled);
+    if (enabled) {
+      if (this.currentJobId) {
+        this.schedulePersistWrite();
+      }
+    } else {
+      this.clearAllStoredData();
+    }
   }
 
   public seriesFor(vertexId: string): readonly WatermarkSample[] {
@@ -117,6 +147,9 @@ export class WatermarkLagHistoryService {
       )
     ).subscribe(results => {
       results.forEach(({ vid, lowWatermark }) => this.appendSample(vid, now, lowWatermark));
+      if (this.persistEnabled$.value) {
+        this.schedulePersistWrite();
+      }
       this.tick$.next(this.tick$.value + 1);
     });
   }
@@ -131,5 +164,106 @@ export class WatermarkLagHistoryService {
       samples.shift();
     }
     this.seriesByVertex.set(vertexId, samples);
+  }
+
+  private readPersistFlag(): boolean {
+    try {
+      return localStorage.getItem(WatermarkLagHistoryService.PERSIST_FLAG_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  private writePersistFlag(enabled: boolean): void {
+    try {
+      localStorage.setItem(WatermarkLagHistoryService.PERSIST_FLAG_KEY, enabled ? 'true' : 'false');
+    } catch {
+      // Ignore quota / unavailable storage.
+    }
+  }
+
+  private storageKeyFor(jobId: string): string {
+    return WatermarkLagHistoryService.PERSIST_DATA_KEY_PREFIX + jobId;
+  }
+
+  private hydrateFromStorage(jobId: string): void {
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(this.storageKeyFor(jobId));
+    } catch {
+      return;
+    }
+    if (!raw) {
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw) as Record<string, WatermarkSample[]>;
+      const cutoff = Date.now() - WatermarkLagHistoryService.RETENTION_MS;
+      for (const [vertexId, samples] of Object.entries(parsed)) {
+        if (!Array.isArray(samples)) {
+          continue;
+        }
+        const trimmed = samples.filter(s => s && typeof s.t === 'number' && s.t >= cutoff);
+        if (trimmed.length > 0) {
+          this.seriesByVertex.set(vertexId, trimmed);
+        }
+      }
+    } catch {
+      // Bad payload — drop it.
+      try {
+        localStorage.removeItem(this.storageKeyFor(jobId));
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  private schedulePersistWrite(): void {
+    if (this.persistWriteTimer !== null) {
+      return;
+    }
+    this.persistWriteTimer = setTimeout(() => {
+      this.persistWriteTimer = null;
+      this.writeStorage();
+    }, WatermarkLagHistoryService.PERSIST_WRITE_DEBOUNCE_MS);
+  }
+
+  private writeStorage(): void {
+    const jobId = this.currentJobId;
+    if (!jobId || !this.persistEnabled$.value) {
+      return;
+    }
+    const payload: Record<string, WatermarkSample[]> = {};
+    this.seriesByVertex.forEach((samples, vertexId) => {
+      payload[vertexId] = samples;
+    });
+    try {
+      localStorage.setItem(this.storageKeyFor(jobId), JSON.stringify(payload));
+    } catch {
+      // Quota exceeded or storage unavailable — silently disable to avoid
+      // repeated failed writes. The user can re-enable from the UI.
+      this.persistEnabled$.next(false);
+      this.writePersistFlag(false);
+    }
+  }
+
+  private clearAllStoredData(): void {
+    if (this.persistWriteTimer !== null) {
+      clearTimeout(this.persistWriteTimer);
+      this.persistWriteTimer = null;
+    }
+    try {
+      const prefix = WatermarkLagHistoryService.PERSIST_DATA_KEY_PREFIX;
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(prefix)) {
+          toRemove.push(key);
+        }
+      }
+      toRemove.forEach(k => localStorage.removeItem(k));
+    } catch {
+      /* ignore */
+    }
   }
 }

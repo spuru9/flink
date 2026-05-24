@@ -45,12 +45,31 @@
 
 .chart-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
 
   .title {
     font-weight: 600;
+  }
+
+  .header-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .persist-toggle {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .persist-label {
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 12px;
   }
 
   .threshold {
