@@ -46,3 +46,15 @@ export interface Watermarks {
   lowWatermark: number;
   watermarks: MetricMap;
 }
+
+export interface WatermarkSample {
+  t: number;
+  lagMs: number;
+  idle: boolean;
+}
+
+export interface WatermarkVertexSeries {
+  vertexId: string;
+  name: string;
+  samples: WatermarkSample[];
+}

@@ -93,6 +93,16 @@ export const COMPLETED_JOB_ROUES: Routes = [
         }
       },
       {
+        path: 'watermarks',
+        loadComponent: () =>
+          import('@flink-runtime-web/pages/job/watermarks/job-watermarks.component').then(
+            m => m.JobWatermarksComponent
+          ),
+        data: {
+          path: 'watermarks'
+        }
+      },
+      {
         path: 'exceptions',
         loadComponent: () =>
           import('@flink-runtime-web/pages/job/exceptions/job-exceptions.component').then(

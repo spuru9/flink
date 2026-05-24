@@ -49,9 +49,24 @@
       [class.selected]="selectedNode?.id === node.id"
     >
       <td nzLeft class="name" [class.selected]="selectedNode?.id === node.id">
-        <a nzTooltipPlacement="topLeft" nz-tooltip [nzTooltipTitle]="node.detail?.name">
-          {{ node.detail?.name }}
-        </a>
+        <div class="name-cell">
+          <a
+            class="name-text"
+            nzTooltipPlacement="topLeft"
+            nz-tooltip
+            [nzTooltipTitle]="node.detail?.name"
+          >
+            {{ node.detail?.name }}
+          </a>
+          <flink-lag-sparkline
+            class="name-sparkline"
+            [values]="lagValuesFor(node.id)"
+            [thresholdMs]="lagThresholdMs"
+            [width]="64"
+            [height]="16"
+            [ariaLabel]="(node.detail?.name || 'operator') + ' watermark lag sparkline'"
+          ></flink-lag-sparkline>
+        </div>
       </td>
       <td>
         <flink-job-badge [state]="node.detail?.status"></flink-job-badge>

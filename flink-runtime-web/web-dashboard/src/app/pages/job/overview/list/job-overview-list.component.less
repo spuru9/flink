@@ -35,16 +35,26 @@
 .name {
   overflow: hidden;
 
-  a {
+  .name-cell {
     position: absolute;
     top: 0;
     left: 8px;
-    display: inline-block;
-    overflow: hidden;
+    display: flex;
+    gap: 8px;
+    align-items: center;
     width: calc(~"100% - 12px");
     line-height: 34px;
+  }
+
+  .name-text {
+    flex: 1 1 auto;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .name-sparkline {
+    flex: 0 0 auto;
   }
 }
 
