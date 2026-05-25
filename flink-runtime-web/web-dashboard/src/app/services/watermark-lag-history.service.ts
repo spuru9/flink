@@ -26,10 +26,11 @@ import { MetricsService } from './metrics.service';
 import { StatusService } from './status.service';
 
 /**
- * Rolling-window history of watermark lag per vertex. Lag is computed
- * client-side as `Date.now() - lowWatermark`; an idle vertex (where
- * `lowWatermark` is unset / Long.MIN_VALUE) is recorded with `idle = true`
- * and `lagMs = NaN` so the chart can render a gap rather than infinite lag.
+ * Rolling-window (60 min) history of watermark lag per vertex. Lag is
+ * computed client-side as `Date.now() - lowWatermark`; an idle vertex
+ * (where `lowWatermark` is unset / Long.MIN_VALUE) is recorded with
+ * `idle = true` and `lagMs = NaN` so the chart can render a gap rather
+ * than infinite lag.
  *
  * Self-polls via `statusService.refresh$` while at least one consumer is
  * tracking. When the last consumer releases, polling halts.
@@ -39,7 +40,7 @@ import { StatusService } from './status.service';
  */
 @Injectable({ providedIn: 'root' })
 export class WatermarkLagHistoryService {
-  private static readonly RETENTION_MS = 30 * 60 * 1000;
+  private static readonly RETENTION_MS = 60 * 60 * 1000;
   private static readonly PERSIST_FLAG_KEY = 'flink:watermark-lag:persist';
   private static readonly PERSIST_DATA_KEY_PREFIX = 'flink:watermark-lag:samples:';
   private static readonly PERSIST_WRITE_DEBOUNCE_MS = 2_000;
